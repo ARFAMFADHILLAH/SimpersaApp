@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SIMPERSA - Sistem Informasi Manajemen Persampahan</title>
+
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <!-- Styles / Scripts -->
+        @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @else
+            <style>
+                body { font-family: 'Instrument Sans', sans-serif; }
+            </style>
+        @endif
+    </head>
+    <body class="bg-[#FDFDFC] antialiased text-[#1b1b18] min-h-screen flex flex-col justify-between">
+
+        <!-- Navbar Top -->
+        <header class="w-full max-w-6xl mx-auto px-6 py-4 flex items-center justify-between border-b border-[#e3e3e0]">
+            <div class="flex items-center gap-2">
+                <!-- Icon Logo Sampah -->
+                <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span class="font-bold text-xl tracking-wider text-gray-900">SIMPERSA</span>
+            </div>
+
+            <nav class="flex gap-4">
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition">
+                            Ke Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 bg-[#1b1b18] text-white text-sm font-medium rounded-md hover:bg-black transition">
+                            Login
+                        </a>
+
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-100 transition">
+                                Register
+                            </a>
+                        @endif
+                    @endauth
+                @endif
+            </nav>
+        </header>
+
+        <!-- Hero Section Main Content -->
+        <main class="flex-1 flex items-center justify-center px-6 py-12">
+            <div class="max-w-xl text-center">
+                <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold uppercase rounded-full tracking-wider mb-4">
+                    Sistem Informasi Manajemen Persampahan
+                </span>
+
+                <h1 class="text-4xl lg:text-5xl font-bold tracking-tight text-gray-950 leading-tight mb-4">
+                    Mewujudkan Lingkungan Bersih & Terkelola Digital
+                </h1>
+
+                <p class="text-lg text-[#706f6c] leading-relaxed mb-8">
+                    Platform integrasi pemantauan rute armada pengangkut, pencatatan timbangan sampah harian, hingga transparansi iuran bulanan warga secara 𝗿𝗲𝗮𝗹-𝘁𝗶𝗺𝗲.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="w-full sm:w-auto text-center px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 shadow transition duration-150">
+                            Buka Layanan Anda
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="w-full sm:w-auto text-center px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 shadow transition duration-150">
+                            Mulai Akses Akun
+                        </a>
+                        <a href="#fitur" class="w-full sm:w-auto text-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-100 transition duration-150">
+                            Pelajari Fitur
+                        </a>
+                    @endauth
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full border-t border-[#e3e3e0] py-6 text-center text-sm text-[#706f6c]">
+            <p>&copy; {{ date('Y') }} SIMPERSA. Hak Cipta Dilindungi.</p>
+        </footer>
+
+    </body>
+</html>
