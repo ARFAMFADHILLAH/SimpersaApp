@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Iuran;
 use App\Models\JadwalNotifikasi;
 use App\Models\Notification;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use App\Models\TemplateNotifikasi;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -95,32 +95,32 @@ class KirimPengingatNotifikasi extends Command
     }
 
     /**
-     * Kirim pengingat iuran ke seluruh pelanggan yang masih menunggak.
+     * Kirim pengingat iuran ke seluruh warga yang masih menunggak.
      */
     private function kirimPengingatIuran(TemplateNotifikasi $template, Carbon $now): int
     {
         $terkirim = 0;
 
-        $pelangganMenunggak = Iuran::with('pelanggan.user')
+        $wargaMenunggak = Iuran::with('warga.user')
             ->where('status_pembayaran', 'Belum Bayar')
             ->get()
-            ->groupBy('pelanggan_id');
+            ->groupBy('warga_id');
 
-        foreach ($pelangganMenunggak as $pelangganId => $tagihanList) {
-            $pelanggan = $tagihanList->first()->pelanggan;
+        foreach ($wargaMenunggak as $wargaId => $tagihanList) {
+            $warga = $tagihanList->first()->warga;
 
-            if (!$pelanggan || !$pelanggan->user) {
+            if (!$warga || !$warga->user) {
                 continue;
             }
 
-            $user = $pelanggan->user;
+            $user = $warga->user;
             $totalTunggakan = $tagihanList->sum('jumlah_tagihan');
             $jumlahBulan = $tagihanList->count();
 
             // Render template dengan placeholder
             $pesan = $this->renderTemplate($template->isi_pesan, [
                 '{nama}' => $user->name,
-                '{nomor}' => $pelanggan->no_pelanggan ?? '-',
+                '{nomor}' => $warga->no_warga ?? '-',
                 '{bulan}' => $tagihanList->last()->bulan_tagihan,
                 '{nominal}' => 'Rp ' . number_format($totalTunggakan, 0, ',', '.'),
                 '{jumlah_bulan}' => $jumlahBulan,
@@ -141,7 +141,7 @@ class KirimPengingatNotifikasi extends Command
                 'judul' => 'Pengingat Iuran Sampah',
                 'pesan' => $pesan,
                 'tipe' => 'pengingat_iuran',
-                'tautan' => route('pelanggan.iuran.index'),
+                'tautan' => route('warga.iuran.index'),
                 'is_read' => false,
             ]);
 

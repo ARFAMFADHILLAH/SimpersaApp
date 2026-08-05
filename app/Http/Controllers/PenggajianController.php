@@ -12,9 +12,9 @@ class PenggajianController extends Controller
     {
         $dataGaji = Penggajian::with('petugas')->orderBy('bulan_gaji', 'desc')->get();
 
-        // Ambil data user yang memiliki akses petugas/bukan pelanggan untuk form dropdown
-        $rolePelanggan = \DB::table('roles')->where('name', 'pelanggan')->first();
-        $dataPetugas = User::where('role_id', '!=', $rolePelanggan->id)->get();
+        // Ambil data user yang memiliki akses petugas/bukan warga untuk form dropdown
+        $roleWarga = \DB::table('roles')->where('name', 'warga')->first();
+        $dataPetugas = User::where('role_id', '!=', $roleWarga->id)->get();
 
         return view('admin.penggajian.index', compact('dataGaji', 'dataPetugas'));
     }

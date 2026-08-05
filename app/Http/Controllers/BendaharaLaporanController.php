@@ -33,7 +33,7 @@ class BendaharaLaporanController extends Controller
 
         $riwayatTransaksi = collect();
 
-        $iuranLunas = Iuran::with('pelanggan.user')
+        $iuranLunas = Iuran::with('warga.user')
             ->where('status_pembayaran', 'Lunas')
             ->whereYear('tanggal_bayar', substr($bulan, 0, 4))
             ->whereMonth('tanggal_bayar', substr($bulan, 5, 2))
@@ -41,7 +41,7 @@ class BendaharaLaporanController extends Controller
             ->map(function ($item) {
                 return (object) [
                     'tanggal' => $item->tanggal_bayar,
-                    'keterangan' => 'Iuran: ' . ($item->pelanggan->user->name ?? 'Warga') . ' (' . $item->bulan_tagihan . ')',
+                    'keterangan' => 'Iuran: ' . ($item->warga->user->name ?? 'Warga') . ' (' . $item->bulan_tagihan . ')',
                     'kategori' => 'Pemasukan',
                     'jumlah' => $item->jumlah_tagihan + $item->denda,
                 ];

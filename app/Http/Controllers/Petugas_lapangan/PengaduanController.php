@@ -11,7 +11,7 @@ class PengaduanController extends Controller
 {
     public function index()
     {
-        $dataPengaduan = Pengaduan::with('pelanggan.user')
+        $dataPengaduan = Pengaduan::with('warga.user')
             ->latest()
             ->get();
 
@@ -20,7 +20,7 @@ class PengaduanController extends Controller
 
     public function show($id)
     {
-        $pengaduan = Pengaduan::with('pelanggan.user')->findOrFail($id);
+        $pengaduan = Pengaduan::with('warga.user')->findOrFail($id);
         return view('petugas_lapangan.pengaduan.show', compact('pengaduan'));
     }
 

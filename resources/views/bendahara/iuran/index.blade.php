@@ -76,13 +76,14 @@
                             <select name="status" class="text-sm border-gray-300 rounded-md shadow-sm">
                                 <option value="">Semua Status</option>
                                 <option value="Belum Bayar" {{ $statusFilter == 'Belum Bayar' ? 'selected' : '' }}>Belum Bayar</option>
+                                <option value="Sedang Diproses" {{ $statusFilter == 'Sedang Diproses' ? 'selected' : '' }}>Sedang Diproses</option>
                                 <option value="Lunas" {{ $statusFilter == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             </select>
                             <button type="submit" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200">Filter</button>
                         </form>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                         <div class="bg-gray-50 p-3 rounded-lg border">
                             <span class="text-xs text-gray-500">Total Tagihan</span>
                             <p class="text-lg font-bold text-gray-800">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</p>
@@ -91,13 +92,17 @@
                             <span class="text-xs text-green-600">Total Lunas</span>
                             <p class="text-lg font-bold text-green-700">Rp {{ number_format($totalLunas, 0, ',', '.') }}</p>
                         </div>
+                        <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                            <span class="text-xs text-amber-600">Menunggu Verifikasi</span>
+                            <p class="text-lg font-bold text-amber-700">{{ $jumlahDiproses }} Tagihan <span class="text-xs font-medium">(Rp {{ number_format($totalDiproses, 0, ',', '.') }})</span></p>
+                        </div>
                         <div class="bg-red-50 p-3 rounded-lg border border-red-200">
                             <span class="text-xs text-red-600">Total Tunggakan</span>
                             <p class="text-lg font-bold text-red-700">Rp {{ number_format($totalTunggakan, 0, ',', '.') }}</p>
                         </div>
-                        <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                            <span class="text-xs text-amber-600">Pelanggan Menunggak</span>
-                            <p class="text-lg font-bold text-amber-700">{{ $jumlahMenunggak }} Orang</p>
+                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            <span class="text-xs text-blue-600">Warga Menunggak</span>
+                            <p class="text-lg font-bold text-blue-700">{{ $jumlahMenunggak }} Orang</p>
                         </div>
                     </div>
 
@@ -106,11 +111,12 @@
                             <thead>
                                 <tr class="border-b bg-gray-50">
                                     <th class="p-3 text-sm font-semibold text-gray-600">Bulan</th>
-                                    <th class="p-3 text-sm font-semibold text-gray-600">Pelanggan</th>
+                                    <th class="p-3 text-sm font-semibold text-gray-600">Warga</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Tagihan</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Denda</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Total</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-3 text-sm font-semibold text-gray-600">Bukti</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Aksi</th>
                                 </tr>
                             </thead>
@@ -119,9 +125,9 @@
                                     <tr class="border-b hover:bg-gray-50">
                                         <td class="p-3 text-sm font-bold text-gray-700">{{ $iur->bulan_tagihan }}</td>
                                         <td class="p-3 text-sm text-gray-900">
-                                            {{ $iur->pelanggan->user->name ?? 'Pelanggan' }}
+                                            {{ $iur->warga->user->name ?? 'Warga' }}
                                             <br>
-                                            <span class="text-xs text-gray-400">No: {{ $iur->pelanggan->no_pelanggan ?? '-' }}</span>
+                                            <span class="text-xs text-gray-400">No: {{ $iur->warga->no_warga ?? '-' }}</span>
                                         </td>
                                         <td class="p-3 text-sm text-gray-900 font-semibold">Rp {{ number_format($iur->jumlah_tagihan, 0, ',', '.') }}</td>
                                         <td class="p-3 text-sm font-medium {{ $iur->denda > 0 ? 'text-red-600' : 'text-gray-400' }}">
@@ -129,15 +135,33 @@
                                         </td>
                                         <td class="p-3 text-sm text-gray-900 font-bold">Rp {{ number_format($iur->jumlah_tagihan + $iur->denda, 0, ',', '.') }}</td>
                                         <td class="p-3 text-sm">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $iur->status_pembayaran == 'Lunas' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $iur->status_pembayaran == 'Lunas' ? 'bg-green-100 text-green-800' : ($iur->status_pembayaran == 'Sedang Diproses' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}">
                                                 {{ $iur->status_pembayaran }}
                                             </span>
                                             @if($iur->status_pembayaran == 'Lunas')
                                                 <div class="text-xs text-gray-400 mt-1">Metode: {{ $iur->metode_pembayaran }}</div>
+                                            @elseif($iur->status_pembayaran == 'Sedang Diproses')
+                                                <div class="text-xs text-gray-400 mt-1">Metode: {{ $iur->metode_pembayaran }}</div>
                                             @endif
                                         </td>
                                         <td class="p-3 text-sm">
-                                            @if($iur->status_pembayaran == 'Belum Bayar')
+                                            @if($iur->bukti_pembayaran)
+                                                <a href="{{ \Storage::url($iur->bukti_pembayaran) }}" target="_blank" class="text-xs text-amber-700 hover:underline font-semibold">
+                                                    Lihat Bukti &rarr;
+                                                </a>
+                                            @else
+                                                <span class="text-xs text-gray-300">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="p-3 text-sm">
+                                            @if($iur->status_pembayaran == 'Sedang Diproses')
+                                                <form action="{{ route('bendahara.iuran.bayar', $iur->id) }}" method="POST" onsubmit="return confirm('Setujui pembayaran ini sebagai LUNAS?')" class="flex gap-1">
+                                                    @csrf
+                                                    <button type="submit" class="text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded font-medium">
+                                                        Verifikasi & Lunas
+                                                    </button>
+                                                </form>
+                                            @elseif($iur->status_pembayaran == 'Belum Bayar')
                                                 <form action="{{ route('bendahara.iuran.bayar', $iur->id) }}" method="POST" onsubmit="return confirm('Konfirmasi pelunasan iuran?')" class="flex gap-1">
                                                     @csrf
                                                     <select name="metode_pembayaran" class="text-xs border-gray-300 rounded-md shadow-sm py-1">
@@ -162,7 +186,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="p-4 text-center text-sm text-gray-500">
+                                        <td colspan="8" class="p-4 text-center text-sm text-gray-500">
                                             Belum ada catatan iuran. Generate tagihan untuk memulai.
                                         </td>
                                     </tr>

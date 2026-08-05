@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Iuran;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use App\Models\PengaturanIuran;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class BendaharaIuranController extends Controller
             ]
         );
 
-        $query = Iuran::with('pelanggan.user');
+        $query = Iuran::with('warga.user');
 
         if ($bulanFilter) {
             $query->where('bulan_tagihan', $bulanFilter);
@@ -43,6 +43,8 @@ class BendaharaIuranController extends Controller
         $totalLunas = $dataIuran->where('status_pembayaran', 'Lunas')->sum('jumlah_tagihan');
         $totalTunggakan = $dataIuran->where('status_pembayaran', 'Belum Bayar')->sum('jumlah_tagihan');
         $jumlahMenunggak = $dataIuran->where('status_pembayaran', 'Belum Bayar')->count();
+        $totalDiproses = $dataIuran->where('status_pembayaran', 'Sedang Diproses')->sum('jumlah_tagihan');
+        $jumlahDiproses = $dataIuran->where('status_pembayaran', 'Sedang Diproses')->count();
 
         $daftarBulan = Iuran::select('bulan_tagihan')
             ->distinct()
@@ -59,6 +61,8 @@ class BendaharaIuranController extends Controller
             'totalLunas',
             'totalTunggakan',
             'jumlahMenunggak',
+            'totalDiproses',
+            'jumlahDiproses',
             'daftarBulan'
         ));
     }
@@ -67,20 +71,20 @@ class BendaharaIuranController extends Controller
     {
         $pengaturan = PengaturanIuran::firstOrFail();
         $bulanIni = Carbon::now()->format('Y-m');
-        $pelangganAktif = Pelanggan::with('user')->whereHas('user', function ($q) {
+        $wargaAktif = Warga::with('user')->whereHas('user', function ($q) {
             $q->where('status', 'aktif');
         })->get();
 
         $countGenerated = 0;
 
-        foreach ($pelangganAktif as $pelanggan) {
-            $exists = Iuran::where('pelanggan_id', $pelanggan->id)
+        foreach ($wargaAktif as $warga) {
+            $exists = Iuran::where('warga_id', $warga->id)
                 ->where('bulan_tagihan', $bulanIni)
                 ->exists();
 
             if (!$exists) {
                 Iuran::create([
-                    'pelanggan_id' => $pelanggan->id,
+                    'warga_id' => $warga->id,
                     'bulan_tagihan' => $bulanIni,
                     'jumlah_tagihan' => $pengaturan->tarif_dasar_bulanan,
                     'denda' => 0,
@@ -102,28 +106,31 @@ class BendaharaIuranController extends Controller
             return redirect()->back()->with('error', 'Tagihan ini sudah lunas.');
         }
 
-        $request->validate([
-            'metode_pembayaran' => 'required|in:Tunai,Non-Tunai',
-        ]);
+        // Metode pembayaran: wajib diisi hanya jika belum pernah dipilih (walk-in di kantor)
+        $rules = [];
+        if (!$iuran->metode_pembayaran) {
+            $rules['metode_pembayaran'] = 'required|in:Tunai,Non-Tunai';
+        }
+        $request->validate($rules);
 
         $denda = PengaturanIuran::hitungDenda($iuran->bulan_tagihan, $iuran->jumlah_tagihan);
 
         $iuran->update([
             'status_pembayaran' => 'Lunas',
             'tanggal_bayar' => Carbon::now()->toDateString(),
-            'metode_pembayaran' => $request->metode_pembayaran,
+            'metode_pembayaran' => $iuran->metode_pembayaran ?: $request->metode_pembayaran,
             'denda' => $denda,
         ]);
 
-        // Notifikasi ke pelanggan bahwa iuran telah dikonfirmasi lunas
-        $iuran->load('pelanggan.user');
-        if ($iuran->pelanggan?->user_id) {
+        // Notifikasi ke warga bahwa iuran telah dikonfirmasi lunas
+        $iuran->load('warga.user');
+        if ($iuran->warga?->user_id) {
             Notification::kirim(
-                $iuran->pelanggan->user_id,
+                $iuran->warga->user_id,
                 'Iuran Sampah Lunas',
                 "Pembayaran iuran periode {$iuran->bulan_tagihan} sebesar Rp " . number_format($iuran->jumlah_tagihan + $iuran->denda, 0, ',', '.') . " telah dikonfirmasi lunas.",
                 'iuran_lunas',
-                route('pelanggan.iuran.index')
+                route('warga.iuran.index')
             );
         }
 
@@ -133,18 +140,18 @@ class BendaharaIuranController extends Controller
 
     public function cetakKwitansi($id)
     {
-        $iuran = Iuran::with('pelanggan.user', 'pelanggan.wilayahPelayanan')->findOrFail($id);
+        $iuran = Iuran::with('warga.user', 'warga.wilayahPelayanan')->findOrFail($id);
 
         return view('bendahara.iuran.kwitansi', compact('iuran'));
     }
 
     public function tunggakan()
     {
-        $dataTunggakan = Iuran::with('pelanggan.user')
-            ->where('status_pembayaran', 'Belum Bayar')
+        $dataTunggakan = Iuran::with('warga.user')
+            ->whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])
             ->orderBy('bulan_tagihan', 'asc')
             ->get()
-            ->groupBy('pelanggan_id');
+            ->groupBy('warga_id');
 
         return view('bendahara.iuran.tunggakan', compact('dataTunggakan'));
     }

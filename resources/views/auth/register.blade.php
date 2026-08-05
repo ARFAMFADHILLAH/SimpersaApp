@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="text-center mb-6">
         <h3 class="text-xl font-bold text-gray-800">Buat Akun Baru</h3>
-        <p class="text-sm text-gray-500 mt-1">Daftar untuk menjadi pelanggan SIMPERSA</p>
+        <p class="text-sm text-gray-500 mt-1">Daftar untuk menjadi warga SIMPERSA</p>
     </div>
 
     <form method="POST" action="{{ route('register') }}">
@@ -26,7 +26,7 @@
             <x-input-label for="role_id" :value="__('Daftar Sebagai')" />
             
             <select id="role_id" name="role_id" class="block mt-1 w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm" required>
-                <option value="6" {{ old('role_id') == 6 ? 'selected' : '' }}>Pelanggan / Warga</option>
+                <option value="6" {{ old('role_id') == 6 ? 'selected' : '' }}>Warga / Warga</option>
             </select>
 
             <x-input-error :messages="$errors->get('role_id')" class="mt-2" />

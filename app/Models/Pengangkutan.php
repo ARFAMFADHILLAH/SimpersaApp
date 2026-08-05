@@ -9,7 +9,7 @@ class Pengangkutan extends Model
     protected $table = 'pengangkutan';
 
     protected $fillable = [
-        'pelanggan_id',
+        'warga_id',
         'armada_id',
         'jenis_sampah_id',
         'petugas_id',
@@ -20,7 +20,7 @@ class Pengangkutan extends Model
         'catatan'
     ];
 
-    public function pelanggan() { return $this->belongsTo(Pelanggan::class); }
+    public function warga() { return $this->belongsTo(Warga::class); }
     public function armada() { return $this->belongsTo(Armada::class); }
     public function jenisSampah() { return $this->belongsTo(JenisSampah::class, 'jenis_sampah_id'); }
     public function petugas() { return $this->belongsTo(User::class, 'petugas_id'); }

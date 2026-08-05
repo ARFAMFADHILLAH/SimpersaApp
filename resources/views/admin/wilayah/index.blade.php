@@ -57,7 +57,7 @@
                                 <th class="p-3">No</th>
                                 <th class="p-3">Nama Wilayah</th>
                                 <th class="p-3">Cakupan Area</th>
-                                <th class="p-3 text-center">Jumlah Pelanggan</th>
+                                <th class="p-3 text-center">Jumlah Warga</th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -71,7 +71,7 @@
                                     </td>
                                     <td class="p-3 text-center">
                                         <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold px-2.5 py-1 rounded-full text-xs">
-                                            {{ $w->pelanggan_count }} Pelanggan
+                                            {{ $w->warga_count }} Warga
                                         </span>
                                     </td>
                                     <td class="p-3 text-center">

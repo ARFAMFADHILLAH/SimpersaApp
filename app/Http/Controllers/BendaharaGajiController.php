@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penggajian;
+use App\Models\PengaturanGaji;
 use App\Models\User;
 use App\Models\AbsensiPetugas;
 use App\Models\Notification;
@@ -16,7 +17,7 @@ class BendaharaGajiController extends Controller
         $bulanFilter = $request->get('bulan', Carbon::now()->format('Y-m'));
 
         $rolePetugas = \DB::table('roles')
-            ->whereIn('name', ['petugas', 'petugas_lapangan', 'supir', 'pengangkut'])
+            ->whereIn('name', ['petugas', 'petugas_lapangan'])
             ->pluck('id');
 
         $dataPetugas = User::whereIn('role_id', $rolePetugas)
@@ -33,11 +34,14 @@ class BendaharaGajiController extends Controller
             ->orderBy('bulan_gaji', 'desc')
             ->pluck('bulan_gaji');
 
+        $pengaturan = PengaturanGaji::ambil();
+
         return view('bendahara.penggajian.index', compact(
             'dataGaji',
             'dataPetugas',
             'bulanFilter',
-            'daftarBulan'
+            'daftarBulan',
+            'pengaturan'
         ));
     }
 
@@ -49,7 +53,7 @@ class BendaharaGajiController extends Controller
 
         $bulan = $request->bulan_gaji;
         $rolePetugas = \DB::table('roles')
-            ->whereIn('name', ['petugas', 'petugas_lapangan', 'supir', 'pengangkut'])
+            ->whereIn('name', ['petugas', 'petugas_lapangan'])
             ->pluck('id');
 
         $petugasAktif = User::whereIn('role_id', $rolePetugas)
@@ -57,6 +61,7 @@ class BendaharaGajiController extends Controller
             ->get();
 
         $countProses = 0;
+        $pengaturan = PengaturanGaji::ambil();
 
         foreach ($petugasAktif as $petugas) {
             $exists = Penggajian::where('petugas_id', $petugas->id)
@@ -75,10 +80,10 @@ class BendaharaGajiController extends Controller
             $totalIzin = $absenBulanIni->where('status', 'izin')->count();
             $totalSakit = $absenBulanIni->where('status', 'sakit')->count();
 
-            $gajiPokok = 1500000;
-            $insentifKehadiran = $totalHadir * 25000;
-            $bonus = ($totalHadir >= 20) ? 200000 : 0;
-            $potonganAbsensi = ($totalAlpha * 50000) + ($totalIzin * 20000);
+            $gajiPokok = (int) $pengaturan->gaji_pokok;
+            $insentifKehadiran = $totalHadir * (int) $pengaturan->insentif_per_hadir;
+            $bonus = ($totalHadir >= (int) $pengaturan->minimal_hadir_bonus) ? (int) $pengaturan->bonus_amount : 0;
+            $potonganAbsensi = ($totalAlpha * (int) $pengaturan->potongan_alpha_per_hari) + ($totalIzin * (int) $pengaturan->potongan_izin_per_hari);
             $totalBersih = $gajiPokok + $insentifKehadiran + $bonus - $potonganAbsensi;
 
             Penggajian::create([

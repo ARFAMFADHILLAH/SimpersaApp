@@ -7,8 +7,9 @@
 
         <title>{{ config('app.name', 'SIMPERSA') }} - Sistem Informasi Manajemen Persampahan</title>
 
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        <link rel="alternate icon" href="/favicon.ico">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" href="/favicon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -30,9 +31,7 @@
                 </div>
                 <div class="relative z-10 text-center max-w-md">
                     <div class="bg-white/20 backdrop-blur-sm p-6 rounded-3xl inline-block mb-8 shadow-xl">
-                        <svg class="h-20 w-20 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
+                        <img src="/logo-kisuci.png" alt="SIMPERSA" class="h-25 w-25 object-cover rounded-2xl shadow-lg">
                     </div>
                     <h1 class="text-4xl font-extrabold text-white mb-3 tracking-tight">SIMPERSA</h1>
                     <p class="text-emerald-100 text-lg font-medium">Sistem Informasi Manajemen<br>Persampahan Terintegrasi</p>
@@ -47,10 +46,8 @@
                 <div class="w-full max-w-md">
                     <!-- Mobile Logo -->
                     <div class="md:hidden text-center mb-8">
-                        <div class="bg-emerald-700 p-4 rounded-2xl inline-flex shadow-lg mb-3">
-                            <svg class="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
+                        <div class="bg-white p-2 rounded-2xl inline-flex shadow-lg mb-3">
+                            <img src="/logo-kisuci.png" alt="SIMPERSA" class="h-10 w-10 object-cover rounded-xl">
                         </div>
                         <h2 class="text-2xl font-extrabold text-gray-800">SIMPERSA</h2>
                         <p class="text-sm text-gray-500 mt-1">Sistem Informasi Manajemen Persampahan</p>

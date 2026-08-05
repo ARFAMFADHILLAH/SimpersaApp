@@ -15,14 +15,10 @@ class RoleAndUserSeeder extends Seeder
     {
         // 1. Daftar Role
         $roles = [
-            'administrator',
-            'manajer',
+            'admin',
+            'owner',
             'petugas_lapangan',
-            'petugas_administrasi',
             'bendahara',
-            'pelanggan',
-            'supir',
-            'pengangkut',
             'warga',
         ];
 
@@ -38,11 +34,11 @@ class RoleAndUserSeeder extends Seeder
             $roleIds[$roleName] = DB::table('roles')->where('name', $roleName)->value('id');
         }
 
-        // 2. Akun Super Admin
+        // 2. Akun Admin (Gabungan Super Admin & Administrasi)
         DB::table('users')->updateOrInsert(
             ['email' => 'admin@sistemsampah.com'],
             [
-                'role_id' => $roleIds['administrator'],
+                'role_id' => $roleIds['admin'],
                 'name' => 'Super Admin',
                 'password' => Hash::make('password123'),
                 'status' => 'aktif',
@@ -51,13 +47,13 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 3. Akun Manajer
+        // 3. Akun Owner
         DB::table('users')->updateOrInsert(
-            ['email' => 'manajer@sistemsampah.com'],
+            ['email' => 'owner@sistemsampah.com'],
             [
-                'role_id' => $roleIds['manajer'],
-                'name' => 'Manajer Utama',
-                'password' => Hash::make('manajer123'),
+                'role_id' => $roleIds['owner'],
+                'name' => 'Owner Utama',
+                'password' => Hash::make('owner123'),
                 'status' => 'aktif',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -77,11 +73,11 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 5. Akun Petugas Administrasi
+        // 5. Akun Admin Kedua (sebelumnya Petugas Administrasi)
         DB::table('users')->updateOrInsert(
             ['email' => 'Anton@sistemsampah.com'],
             [
-                'role_id' => $roleIds['petugas_administrasi'],
+                'role_id' => $roleIds['admin'],
                 'name' => 'Anton Administrasi',
                 'password' => Hash::make('admin123'),
                 'status' => 'aktif',
@@ -103,20 +99,20 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 7. Akun Pelanggan
-        $pelangganUserId = null;
+        // 7. Akun Warga
+        $wargaUserId = null;
         DB::table('users')->updateOrInsert(
-            ['email' => 'pelanggan@sistemsampah.com'],
+            ['email' => 'warga@sistemsampah.com'],
             [
-                'role_id' => $roleIds['pelanggan'],
-                'name' => 'Budi Pelanggan',
-                'password' => Hash::make('pelanggan123'),
+                'role_id' => $roleIds['warga'],
+                'name' => 'Budi Warga',
+                'password' => Hash::make('warga123'),
                 'status' => 'aktif',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         );
-        $pelangganUserId = DB::table('users')->where('email', 'pelanggan@sistemsampah.com')->value('id');
+        $wargaUserId = DB::table('users')->where('email', 'warga@sistemsampah.com')->value('id');
 
         // 8. Seed Data Wilayah Pelayanan
         $wilayahId = DB::table('wilayah_pelayanan')->value('id');
@@ -140,11 +136,11 @@ class RoleAndUserSeeder extends Seeder
             $ruteId = DB::table('rute')->value('id');
         }
 
-        // 10. Profil Pelanggan (data di tabel pelanggan)
-        if ($pelangganUserId && !DB::table('pelanggan')->where('user_id', $pelangganUserId)->exists()) {
-            DB::table('pelanggan')->insert([
-                'user_id' => $pelangganUserId,
-                'no_pelanggan' => 'PLG-' . date('Ymd') . '-001',
+        // 10. Profil Warga (data di tabel warga)
+        if ($wargaUserId && !DB::table('warga')->where('user_id', $wargaUserId)->exists()) {
+            DB::table('warga')->insert([
+                'user_id' => $wargaUserId,
+                'no_warga' => 'WRG-' . date('Ymd') . '-001',
                 'no_hp' => '081234567890',
                 'alamat_lengkap' => 'Jl. Contoh No. 123, RT 01/02',
                 'rute_id' => $ruteId,

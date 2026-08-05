@@ -35,7 +35,7 @@
                                         {{ $item->created_at ? date('d/m/Y', strtotime($item->created_at)) : '-' }}
                                     </td>
                                     <td class="p-4 font-medium text-gray-900">
-                                        {{ $item->pelanggan->user->name ?? 'Warga' }}
+                                        {{ $item->warga->user->name ?? 'Warga' }}
                                     </td>
                                     <td class="p-4 text-xs text-gray-700">
                                         @if($item->tipe_kendala)

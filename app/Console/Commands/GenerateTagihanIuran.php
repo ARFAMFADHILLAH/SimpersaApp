@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Iuran;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use App\Models\PengaturanIuran;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -23,7 +23,7 @@ class GenerateTagihanIuran extends Command
      *
      * @var string
      */
-    protected $description = 'Generate tagihan iuran bulanan otomatis untuk seluruh pelanggan aktif';
+    protected $description = 'Generate tagihan iuran bulanan otomatis untuk seluruh warga aktif';
 
     /**
      * Execute the console command.
@@ -47,7 +47,7 @@ class GenerateTagihanIuran extends Command
             return self::FAILURE;
         }
 
-        $pelangganAktif = Pelanggan::with('user')
+        $wargaAktif = Warga::with('user')
             ->whereHas('user', function ($q) {
                 $q->where('status', 'aktif');
             })
@@ -56,8 +56,8 @@ class GenerateTagihanIuran extends Command
         $countGenerated = 0;
         $countSkipped = 0;
 
-        foreach ($pelangganAktif as $pelanggan) {
-            $exists = Iuran::where('pelanggan_id', $pelanggan->id)
+        foreach ($wargaAktif as $warga) {
+            $exists = Iuran::where('warga_id', $warga->id)
                 ->where('bulan_tagihan', $bulan)
                 ->exists();
 
@@ -67,7 +67,7 @@ class GenerateTagihanIuran extends Command
             }
 
             Iuran::create([
-                'pelanggan_id' => $pelanggan->id,
+                'warga_id' => $warga->id,
                 'bulan_tagihan' => $bulan,
                 'jumlah_tagihan' => $pengaturan->tarif_dasar_bulanan,
                 'denda' => 0,

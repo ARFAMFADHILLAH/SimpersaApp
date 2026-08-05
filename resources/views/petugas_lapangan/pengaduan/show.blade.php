@@ -20,7 +20,7 @@
                 <div class="border-t border-gray-200 pt-4 space-y-3">
                     <div>
                         <span class="text-xs font-bold text-gray-500 uppercase">Pelapor</span>
-                        <p class="text-sm font-medium text-gray-900">{{ $pengaduan->pelanggan->user->name ?? 'Warga' }}</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $pengaduan->warga->user->name ?? 'Warga' }}</p>
                     </div>
                     <div>
                         <span class="text-xs font-bold text-gray-500 uppercase">Tipe Kendala</span>

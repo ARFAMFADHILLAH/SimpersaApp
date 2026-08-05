@@ -9,7 +9,7 @@
                      Untuk desktop, area ini sengaja dikosongkan agar konten Anda sejajar di sebelah kanan sidebar. -->
                 <div class="sm:hidden shrink-0 flex items-center">
                     <a href="{{ route('admin.dashboard') }}" class="font-bold text-gray-800 tracking-tight text-sm flex items-center gap-2">
-                        <span class="bg-indigo-600 text-white p-1.5 rounded text-xs">SP</span>
+                        <span class="bg-white p-0.5 rounded-lg"><img src="/logo-kisuci.png" alt="SIMPERSA" class="h-6 w-6 object-cover rounded-md"></span>
                         SIMPERSA
                     </a>
                 </div>
@@ -30,7 +30,7 @@
 
 <span class="px-2.5 py-1 text-[11px] font-semibold rounded-full uppercase tracking-wider
     @if(in_array(strtolower($roleName), ['admin', 'administrator'])) bg-red-50 text-red-700 border border-red-200
-    @elseif(in_array(strtolower($roleName), ['manager', 'pimpinan'])) bg-indigo-50 text-indigo-700 border border-indigo-200
+    @elseif(in_array(strtolower($roleName), ['owner', 'pimpinan'])) bg-indigo-50 text-indigo-700 border border-indigo-200
     @else bg-gray-50 text-gray-700 border border-gray-200 @endif">
     {{ $roleName }}
 </span>

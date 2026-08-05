@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Iuran;
 use App\Models\GajiPetugas;
 use App\Models\Pengeluaran;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use App\Models\Penggajian;
 use Carbon\Carbon;
 
@@ -36,11 +36,11 @@ class DashboardController extends Controller
         $sisaLabaRugiBersih = $totalPemasukanBulanIni - $totalPengeluaranBulanIni;
 
         // 2. MONITORING TUNGGAKAN IURAN
-        $totalPelangganMenunggak = Iuran::where('status_pembayaran', 'Belum Lunas')->count();
-        $totalNominalTunggakan = Iuran::where('status_pembayaran', 'Belum Lunas')->sum('jumlah_tagihan');
+        $totalWargaMenunggak = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->count();
+        $totalNominalTunggakan = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->sum('jumlah_tagihan');
 
         // Data 5 Transaksi Pembayaran Iuran Terbaru
-        $transaksiTerbaru = Iuran::with('pelanggan.user')
+        $transaksiTerbaru = Iuran::with('warga.user')
             ->where('status_pembayaran', 'Lunas')
             ->latest('tanggal_bayar')
             ->take(5)
@@ -57,7 +57,7 @@ class DashboardController extends Controller
             'totalOperasionalBulanIni',
             'totalPengeluaranBulanIni',
             'sisaLabaRugiBersih',
-            'totalPelangganMenunggak',
+            'totalWargaMenunggak',
             'totalNominalTunggakan',
             'transaksiTerbaru',
             'operasionalTerbaru'

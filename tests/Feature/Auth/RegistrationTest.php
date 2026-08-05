@@ -18,10 +18,12 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        $roleWargaId = \Illuminate\Support\Facades\DB::table('roles')->where('name', 'warga')->value('id');
+
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'role_id' => 1,
+            'role_id' => $roleWargaId,
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);

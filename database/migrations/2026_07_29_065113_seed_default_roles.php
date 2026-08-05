@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $roles = ['administrator', 'manajer', 'petugas_lapangan', 'petugas_administrasi', 'bendahara', 'pelanggan'];
+        $roles = ['administrator', 'manajer', 'petugas_lapangan', 'petugas_administrasi', 'bendahara', 'warga'];
 
         foreach ($roles as $role) {
             DB::table('roles')->updateOrInsert(
@@ -23,7 +23,7 @@ return new class extends Migration
     {
         DB::table('roles')->whereIn('name', [
             'administrator', 'manajer', 'petugas_lapangan',
-            'petugas_administrasi', 'bendahara', 'pelanggan'
+            'petugas_administrasi', 'bendahara', 'warga'
         ])->delete();
     }
 };

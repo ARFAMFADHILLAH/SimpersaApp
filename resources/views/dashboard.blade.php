@@ -1,9 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
+    {{-- <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard Eksekutif Manajemen Persampahan') }}
         </h2>
-    </x-slot>
+    </x-slot> --}}
 
     <div class="py-12 bg-gray-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
@@ -31,23 +31,23 @@
                 </div>
             </div>
 
-            <!-- BARIS 2: METRIK OPERASIONAL & PELANGGAN -->
+            <!-- BARIS 2: METRIK OPERASIONAL & WARGA -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Box Kiri: Data Pelanggan -->
+                <!-- Box Kiri: Data Warga -->
                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h4 class="text-gray-800 font-semibold mb-4 border-b pb-2">👥 Status Kepelangganan</h4>
+                    <h4 class="text-gray-800 font-semibold mb-4 border-b pb-2">👥 Status Kewargaan</h4>
                     <div class="grid grid-cols-3 gap-2 text-center">
                         <div class="bg-gray-50 p-3 rounded">
                             <span class="text-xs text-gray-500">Total</span>
-                            <div class="text-xl font-bold text-gray-800">{{ $totalPelanggan }}</div>
+                            <div class="text-xl font-bold text-gray-800">{{ $totalWarga }}</div>
                         </div>
                         <div class="bg-green-50 p-3 rounded">
                             <span class="text-xs text-green-600">Aktif</span>
-                            <div class="text-xl font-bold text-green-700">{{ $pelangganAktif }}</div>
+                            <div class="text-xl font-bold text-green-700">{{ $wargaAktif }}</div>
                         </div>
                         <div class="bg-red-50 p-3 rounded">
                             <span class="text-xs text-red-600">Menunggak</span>
-                            <div class="text-xl font-bold text-red-700">{{ $pelangganMenunggak }}</div>
+                            <div class="text-xl font-bold text-red-700">{{ $wargaMenunggak }}</div>
                         </div>
                     </div>
                 </div>
@@ -84,8 +84,8 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm text-indigo-700 font-medium">
-                            @if($pelangganMenunggak > 0)
-                                Terdeteksi ada {{ $pelangganMenunggak }} pelanggan yang menunggak iuran. Sistem menyarankan Anda untuk segera mengaktifkan fitur Notifikasi Pengingat Otomatis (Modul 13).
+                            @if($wargaMenunggak > 0)
+                                Terdeteksi ada {{ $wargaMenunggak }} warga yang menunggak iuran. Sistem menyarankan Anda untuk segera mengaktifkan fitur Notifikasi Pengingat Otomatis (Modul 13).
                             @else
                                 Neraca kas dan status kepangganan terpantau stabil. Alokasi anggaran BBM operasional dapat dijadwalkan ulang secara aman.
                             @endif

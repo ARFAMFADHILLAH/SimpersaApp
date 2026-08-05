@@ -10,7 +10,7 @@
             <div class="p-4 bg-white shadow sm:rounded-lg">
                 <div class="mb-4">
                     <a href="{{ route('admin.rute.index') }}" class="text-sm text-indigo-600 hover:underline">← Kembali ke daftar rute</a>
-                    <p class="text-sm text-gray-500 mt-1">Berikut adalah sebaran lokasi pelanggan aktif di dalam sistem rute armada ini.</p>
+                    <p class="text-sm text-gray-500 mt-1">Berikut adalah sebaran lokasi warga aktif di dalam sistem rute armada ini.</p>
                 </div>
 
                 <!-- Kontainer Peta -->
@@ -24,7 +24,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Inisialisasi peta ke koordinat default (Contoh pusat Indonesia / Jakarta jika data rute kosong)
-        // Set view default ke koordinat Jakarta jika data lokasi pelanggan kosong [-6.2088, 106.8456]
+        // Set view default ke koordinat Jakarta jika data lokasi warga kosong [-6.2088, 106.8456]
         var map = L.map('map').setView([-6.2088, 106.8456], 13);
 
         // Pasang layer map OpenStreetMap gratisan
@@ -36,21 +36,21 @@
         // Array penampung koordinat untuk auto-zoom peta agar fokus ke sekumpulan titik marker
         var markersBounds = [];
 
-        // Parsing data pelanggan dari Laravel Blade ke JavaScript Object secara aman
-        @foreach($pelangganPeta as $plg)
+        // Parsing data warga dari Laravel Blade ke JavaScript Object secara aman
+        @foreach($wargaPeta as $plg)
             var lat = {{ $plg->latitude }};
             var lng = {{ $plg->longitude }};
             var nama = "{{ $plg->user->name }}";
-            var noPlg = "{{ $plg->no_pelanggan }}";
+            var noPlg = "{{ $plg->no_warga }}";
 
             // Buat penanda pin (marker) di peta
             var marker = L.marker([lat, lng]).addTo(map)
-                .bindPopup("<b>" + nama + "</b><br>No Pelanggan: " + noPlg);
+                .bindPopup("<b>" + nama + "</b><br>No Warga: " + noPlg);
 
             markersBounds.push([lat, lng]);
         @endforeach
 
-        // Jika ada pelanggan yang memiliki titik koordinat, atur fokus kamera peta otomatis ke area tersebut
+        // Jika ada warga yang memiliki titik koordinat, atur fokus kamera peta otomatis ke area tersebut
         if (markersBounds.length > 0) {
             var bounds = L.latLngBounds(markersBounds);
             map.fitBounds(bounds);

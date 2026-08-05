@@ -8,7 +8,7 @@ Dibangun dengan **Laravel 13.8** + **Blade** + **Tailwind CSS 3** + **Alpine.js*
 
 - 📊 Dashboard eksekutif dengan 4 KPI + 3 grafik 12 bulan (pembayaran, volume, biaya) + produktivitas petugas
 - 🧾 Tagihan iuran otomatis setiap bulan + denda dinamis (max persentase vs flat)
-- 💰 Penggajian otomatis dari absensi (insentif, bonus, potongan) + slip gaji
+- 💰 Penggajian otomatis dari absensi (gaji pokok, insentif, bonus, potongan — dikonfigurasi admin) + slip gaji
 - 📍 Pengaduan masyarakat dengan geolokasi (latitude/longitude otomatis) + tautan Google Maps
 - 🏦 Neraca kas, arus kas, dan laba rugi dengan grafik Chart.js
 - 🧮 Decision Support System: kriteria berbobot + skor alternatif + evaluasi wilayah
@@ -16,15 +16,15 @@ Dibangun dengan **Laravel 13.8** + **Blade** + **Tailwind CSS 3** + **Alpine.js*
 - ⚙️ Rekap volume harian/mingguan/bulanan + berat sampah (kg)
 - ⏰ Otomatisasi terjadwal via cron (tagihan & notifikasi pengingat)
 - 📱 Responsif (desktop & mobile) — sidebar + bottom-nav per peran
+- 👑 Owner (read-only): pantau laporan pendapatan, volume sampah, kas masuk/keluar, status armada & petugas, kendala petugas
 
 ## Daftar Isi Halaman
 
-- **Administrator** (`/admin`) — master data, tarif & denda, DSS, template notifikasi, utilitas & backup
-- **Manajer** (`/manager`) — Executive Dashboard, DSS, 9 sub-laporan, keuangan, armada, rute, pengaduan
+- **Administrator** (`/admin`) — master data, tarif & denda, pengaturan gaji, DSS, template notifikasi, utilitas & backup
+- **Owner** (`/owner`) — Pusat Pantauan read-only: DSS, 10 sub-laporan (termasuk kendala petugas), keuangan, armada, rute, pengaduan
 - **Bendahara** (`/bendahara`) — iuran, tunggakan, penggajian, operasional, laporan keuangan
-- **Petugas Administrasi** (`/administrasi`) — master, registrasi pelanggan, rekap sampah, penugasan, dispatch pengaduan
-- **Petugas Lapangan** (`/petugas`) — rute & tugas harian, input volume/berat, dokumentasi, absensi, gaji
-- **Pelanggan** (`/pelanggan`) — profil, riwayat, pembayaran iuran + kwitansi, pengaduan, notifikasi
+- **Petugas Lapangan** (`/petugas`) — rute & tugas harian, input volume/berat, dokumentasi, laporan kendala, absensi, gaji
+- **Warga** (`/warga`) — profil, riwayat, pembayaran iuran + kwitansi, pengaduan, notifikasi
 
 ## Cara Menjalankan
 
@@ -32,7 +32,7 @@ Dibangun dengan **Laravel 13.8** + **Blade** + **Tailwind CSS 3** + **Alpine.js*
 composer install           # install dependency
 cp .env.example .env       # atur koneksi database MySQL
 php artisan key:generate
-php artisan migrate --seed # migrasi + data demo (9 peran, 6 akun, 3 wilayah, 3 rute)
+php artisan migrate --seed # migrasi + data demo (5 peran, 6 akun, 3 wilayah, 3 rute)
 php artisan serve          # jalankan → http://localhost:8000
 ```
 
@@ -65,19 +65,17 @@ php artisan view:cache
 │   ├── Console/Commands/       # iuran:generate-tagihan, notifikasi:kirim-pengingat
 │   ├── Http/Controllers/
 │   │   ├── Admin/              # area administrator
-│   │   ├── Administrasi/       # area petugas administrasi
+│   │   ├── Owner/              # area owner (pantauan read-only)
 │   │   ├── Bendahara/          # area bendahara
-│   │   ├── Manager/            # area manajer
-│   │   ├── Pelanggan/          # area pelanggan
 │   │   └── Petugas_lapangan/   # area petugas lapangan
-│   ├── Models/                 # 21 model
+│   ├── Models/                 # 22 model
 │   └── Providers/
 ├── database/
-│   ├── migrations/             # 28 migrasi
+│   ├── migrations/             # 35 migrasi
 │   └── seeders/                # role, user, wilayah, rute
 ├── resources/views/            # view per area + components (sidebar, bottom-nav)
 ├── routes/
-│   └── web.php                 # ±138 rute terintegrasi
+│   └── web.php                 # ±172 rute terintegrasi
 ├── public/
 └── PRESENTASI.md               # catatan presentasi lengkap
 ```
@@ -108,14 +106,11 @@ SIMPERSA menjawabnya dengan 13 modul fungsional yang saling terhubung, dilengkap
 
 | No | Peran | Ringkasan Tugas |
 |----|-------|-----------------|
-| 1 | Administrator | Kelola master data, pengaturan tarif & denda, konfigurasi DSS, template & jadwal notifikasi, utilitas sistem & backup database |
-| 2 | Manajer / Pimpinan | Pantau seluruh operasional lewat dashboard eksekutif, DSS, laporan, keuangan, armada, rute |
-| 3 | Bendahara / Keuangan | Kelola iuran, tunggakan, penggajian, pengeluaran operasional, laporan keuangan & laba rugi |
-| 4 | Petugas Administrasi | Registrasi pelanggan, perbarui master data, rekap sampah, jadwal rute, tugaskan petugas, verifikasi & dispatch pengaduan |
-| 5 | Petugas Lapangan | Kerjakan rute & tugas harian, input volume/berat sampah, dokumentasi foto, lapor kendala, absensi |
-| 6 | Supir / Pengangkut | Bagian dari petugas lapangan dalam eksekusi rute pengangkutan |
-| 7 | Pelanggan | Pantau riwayat, bayar iuran, unduh kwitansi, ajukan pengaduan, terima notifikasi |
-| 8 | Warga | Akses area masyarakat (sama dengan pelanggan) |
+| 1 | Administrator | Kelola master data, pengaturan tarif & denda, pengaturan gaji, konfigurasi DSS, template & jadwal notifikasi, utilitas sistem & backup database |
+| 2 | Owner / Pemilik | Pantau read-only seluruh operasional: laporan pendapatan, volume sampah, kas masuk/keluar, status armada & petugas, kendala petugas |
+| 3 | Bendahara / Keuangan | Kelola iuran, tunggakan, proses penggajian, pengeluaran operasional, laporan keuangan & laba rugi |
+| 4 | Petugas Lapangan | Kerjakan rute & tugas harian, input volume/berat sampah, dokumentasi foto, lapor kendala, absensi |
+| 5 | Warga | Pantau riwayat, bayar iuran, unduh kwitansi, ajukan pengaduan, terima notifikasi |
 
 ---
 
@@ -123,12 +118,11 @@ SIMPERSA menjawabnya dengan 13 modul fungsional yang saling terhubung, dilengkap
 
 | Peran | Area Halaman | Fungsi Kunci |
 |-------|--------------|--------------|
-| Administrator | `/admin/*` | CRUD user, pelanggan, armada, wilayah, TPS, jenis sampah; pengaturan iuran & denda; monitoring pengangkutan; laporan sistem; pengaturan DSS (kriteria & skor); template & jadwal notifikasi; backup database |
-| Manajer | `/manager/*` | Executive Dashboard (KPI + 3 grafik), DSS & evaluasi wilayah, 9 sub-laporan (termasuk tunggakan, petugas, rekap tahunan), keuangan, kondisi armada, rute & peta, log pengaduan, generate & bayar iuran |
+| Administrator | `/admin/*` | CRUD user, pelanggan, armada, wilayah, TPS, jenis sampah; pengaturan iuran & denda; pengaturan gaji; monitoring pengangkutan; laporan sistem; pengaturan DSS (kriteria & skor); template & jadwal notifikasi; backup database |
+| Owner | `/owner/*` | Pusat Pantauan (read-only): DSS & evaluasi wilayah, laporan pendapatan/volume/kas/armada/petugas/kendala, keuangan, kondisi armada, rute & peta, log pengaduan |
 | Bendahara | `/bendahara/*` | Iuran (generate, bayar, kwitansi, tunggakan), penggajian (proses, bayar, slip, rekap), operasional (input & verifikasi), laporan (laba rugi, neraca kas, arus kas, grafik) |
-| Petugas Administrasi | `/administrasi/*` | Master (edit pelanggan/TPS/armada), registrasi pelanggan walk-in, operasional & rekap volume, jadwal rute & penugasan, logistik, verifikasi & dispatch pengaduan |
 | Petugas Lapangan | `/petugas/*` | Dashboard, rute & tugas harian, update status + dokumentasi foto, input pengangkutan (volume/berat), penanganan pengaduan, gaji, laporan kendala, absensi clock-in/out |
-| Pelanggan | `/pelanggan/*` | Dashboard, profil, riwayat pengangkutan, iuran (bayar + kwitansi), pengaduan (buat & pantau), notifikasi |
+| Warga | `/warga/*` | Dashboard, profil, riwayat pengangkutan, iuran (bayar + kwitansi), pengaduan (buat & pantau), notifikasi |
 
 Setelah login, semua peran otomatis diarahkan ke dashboard masing-masing melalui halaman `/dashboard`.
 
@@ -148,12 +142,12 @@ Setelah login, semua peran otomatis diarahkan ke dashboard masing-masing melalui
 
 ### Angka Proyek
 
-- 21 model database
-- 28 migrasi
-- 63 controller
-- ±138 rute
+- 22 model database
+- 35 migrasi
+- 62 controller
+- ±172 rute
 - 2 command artisan terjadwal (`iuran:generate-tagihan`, `notifikasi:kirim-pengingat`)
-- 9 peran pengguna
+- 5 peran pengguna (administrator, owner, bendahara, petugas lapangan, warga)
 
 ---
 
@@ -197,11 +191,12 @@ Setelah login, semua peran otomatis diarahkan ke dashboard masing-masing melalui
 ### Modul 6 - Penggajian Petugas
 
 - Proses gaji bulanan otomatis dari data absensi: hadir, alpha, izin, sakit.
+- **Parameter gaji dikonfigurasi admin** di halaman `Pengaturan Gaji` (`/admin/gaji/pengaturan`): gaji pokok, insentif per hadir, bonus kehadiran, minimal hadir untuk bonus, potongan alpha/hari, potongan izin/hari — semua dalam format Rupiah.
 - **Rumus penghitungan**:
-  - Gaji pokok
-  - Insentif kehadiran Rp25.000 x jumlah hadir
-  - Bonus Rp200.000 jika hadir 20 hari atau lebih
-  - Potongan alpha Rp50.000/hari dan izin Rp20.000/hari
+  - Gaji pokok (default Rp1.500.000)
+  - Insentif kehadiran (default Rp25.000) x jumlah hadir
+  - Bonus (default Rp200.000) jika hadir mencapai minimal hadir (default 20 hari)
+  - Potongan alpha (default Rp50.000/hari) dan izin (default Rp20.000/hari)
   - Total bersih = pokok + insentif + bonus - potongan (tidak pernah negatif)
 - **Cetak slip gaji** per petugas dan **rekap gaji** per periode.
 - Pembayaran gaji memicu notifikasi ke petugas yang bersangkutan.
@@ -219,22 +214,23 @@ Setelah login, semua peran otomatis diarahkan ke dashboard masing-masing melalui
 - **Arus kas**: kas masuk, kas keluar, dan sisa kas per periode dengan grafik.
 - Grafik pendapatan untuk analisis tren bulanan.
 
-### Modul 9 - Dashboard Manajemen
+### Modul 9 - Dashboard Manajemen (Owner)
 
-- Kartu KPI eksekutif: total pelanggan (aktif & menunggak), pendapatan iuran, biaya operasional + gaji, volume sampah terangkut (m3).
+- **Pusat Pantauan Owner** bersifat read-only: kartu KPI — total pelanggan (aktif & menunggak), pendapatan iuran, biaya operasional + gaji, volume sampah terangkut (m3).
 - **Status kesiapan armada & petugas** (siap/rusak, hadir/alpha).
 - **Produktivitas petugas** - ringkasan capaian per petugas lapangan.
 - **3 grafik 12 bulan**: grafik pembayaran, grafik volume sampah, grafik biaya operasional - dasar pengambilan keputusan berbasis data.
-- Quick-links ke seluruh laporan eksekutif dan DSS.
+- Quick-links ke seluruh laporan pantauan (termasuk laporan kendala petugas) dan DSS.
 
 ### Modul 10 - Laporan
 
 Sub-laporan yang tersedia:
 
-- Laporan pelanggan (status & tunggakan) dan laporan iuran.
+- Laporan pelanggan (status & tunggakan) dan laporan iuran/pendapatan.
 - **Laporan tunggakan**: daftar pelanggan beserta jumlah bulan dan nominal yang tertunggak.
-- Laporan volume sampah (dengan berat), laporan keuangan, laporan gaji, laporan armada.
+- Laporan volume sampah (dengan berat), laporan keuangan (kas masuk/keluar gabungan), laporan gaji, laporan armada.
 - **Laporan petugas**: kinerja/produktivitas per petugas lapangan.
+- **Laporan kendala petugas**: kendala yang dilaporkan petugas di lapangan.
 - **Rekap tahunan**: agregasi data 12 bulan.
 - Seluruh laporan dapat dicetak.
 
@@ -283,21 +279,20 @@ Tanpa cron, kedua perintah tetap bisa dijalankan manual lewat `php artisan`.
 
 Berikut alur live demo yang paling representatif (sekitar 5-7 menit):
 
-1. **Login pelanggan** (`pelanggan@sistemsampah.com`) -> buka Pengaduan -> klik **Buat Pengaduan**, isi kendala, tekan **Ambil Lokasi** (koordinat terisi otomatis), unggah foto, kirim.
-2. **Login admin** (`admin@sistemsampah.com`) -> perhatikan **badge notifikasi** bertambah -> buka Pusat Notifikasi -> buka detail pengaduan (link Google Maps) -> verifikasi.
-3. **Login administrasi** (`Anton@sistemsampah.com`) -> dispatch pengaduan ke petugas lapangan.
-4. **Login petugas lapangan** (`andi@sistemsampah.com`) -> buka Tugas Harian -> ubah status menjadi Selesai + unggah dokumentasi.
+1. **Login warga** (`warga@sistemsampah.com`) -> buka Pengaduan -> klik **Buat Pengaduan**, isi kendala, tekan **Ambil Lokasi** (koordinat terisi otomatis), unggah foto, kirim.
+2. **Login admin** (`admin@sistemsampah.com`) -> perhatikan **badge notifikasi** bertambah -> buka Pusat Notifikasi -> buka detail pengaduan (link Google Maps) -> verifikasi -> dispatch pengaduan ke petugas lapangan.
+3. **Login petugas lapangan** (`andi@sistemsampah.com`) -> buka Tugas Harian -> ubah status menjadi Selesai + unggah dokumentasi.
 5. **Login bendahara** (`bendahara@sistemsampah.com`) -> buka Laporan -> **Neraca Kas** dan **Arus Kas** (tunjukkan grafik) -> buka Penggajian, proses gaji, lalu bayar gaji (notifikasi terkirim ke petugas).
-6. **Login manajer** (`manajer@sistemsampah.com`) -> **Executive Dashboard**: tunjukkan 4 kartu KPI, status armada/petugas, dan 3 grafik 12 bulan -> buka Laporan -> **Tunggakan**, **Petugas**, **Rekap Tahunan**.
-7. **Tutup dengan admin** -> Pengaturan DSS: tambah kriteria & isi skor alternatif -> tunjukkan halaman DSS manajer (evaluasi wilayah) sebagai penutup.
+6. **Login owner** (`owner@sistemsampah.com`) -> **Pusat Pantauan**: tunjukkan 4 kartu KPI, status armada/petugas, dan 3 grafik 12 bulan -> buka Laporan -> **Pendapatan**, **Kendala Petugas**, **Rekap Tahunan**.
+7. **Tutup dengan admin** -> Pengaturan DSS: tambah kriteria & isi skor alternatif -> tunjukkan halaman DSS owner (evaluasi wilayah) sebagai penutup.
 
 ---
 
 ## 7. Poin Sorotan (Cheat-Sheet Pembicara)
 
-- **Dashboard eksekutif**: keputusan pimpinan didukung 4 KPI + 3 grafik 12 bulan + produktivitas petugas - bukan lagi perkiraan.
+- **Dashboard eksekutif**: keputusan owner didukung 4 KPI + 3 grafik 12 bulan + produktivitas petugas - bukan lagi perkiraan.
 - **Tagihan otomatis + denda dinamis**: sistem menagih sendiri setiap bulan; denda memakai skema paling menguntungkan unit pengelola (max persentase vs flat).
-- **Penggajian otomatis**: gaji dihitung dari absensi dengan formula insentif/bonus/potongan yang transparan.
+- **Penggajian otomatis**: gaji dihitung dari absensi dengan parameter (pokok/insentif/bonus/potongan) yang dikonfigurasi admin dalam format Rupiah.
 - **Pengaduan terlacak end-to-end**: geolokasi + foto + dispatch + status + notifikasi di semua sisi.
 - **Keuangan lengkap**: laba rugi, neraca kas, dan arus kas dalam satu klik.
 - **DSS berbasis kriteria**: prioritas penanganan wilayah tidak subjektif, ada bobot dan skor.
@@ -310,17 +305,16 @@ Berikut alur live demo yang paling representatif (sekitar 5-7 menit):
 | Peran | Email | Password |
 |-------|-------|----------|
 | Administrator | admin@sistemsampah.com | password123 |
-| Manajer | manajer@sistemsampah.com | manajer123 |
+| Owner | owner@sistemsampah.com | owner123 |
 | Petugas Lapangan | andi@sistemsampah.com | petugas123 |
-| Petugas Administrasi | Anton@sistemsampah.com | admin123 |
 | Bendahara | bendahara@sistemsampah.com | bendahara123 |
-| Pelanggan | pelanggan@sistemsampah.com | pelanggan123 |
+| Warga | warga@sistemsampah.com | warga123 |
 
 ---
 
 ## 9. Persiapan Presentasi
 
-- Jalankan `php artisan migrate --seed` (seeder menyiapkan 9 peran, 6 akun demo, 3 wilayah pelayanan, 3 rute, dan 1 pelanggan).
+- Jalankan `php artisan migrate --seed` (seeder menyiapkan 5 peran, 6 akun demo, 3 wilayah pelayanan, 3 rute, dan 1 warga).
 - Hidupkan data transaksi: `php artisan iuran:generate-tagihan` lalu lakukan beberapa pembayaran lewat UI agar grafik dan laporan tidak kosong.
 - Jalankan `php artisan notifikasi:kirim-pengingat` agar notifikasi pengingat tersedia saat demo.
 - Mulai server: `php artisan serve` lalu buka `http://localhost:8000`.
@@ -330,7 +324,7 @@ Berikut alur live demo yang paling representatif (sekitar 5-7 menit):
 
 ## 10. Penutup
 
-SIMPERSA menghubungkan seluruh rantai kerja persampahan - dari lapangan, administrasi, keuangan, hingga meja pimpinan - dalam satu sistem dengan data yang konsisten dan otomatisasi yang mengurangi pekerjaan manual. Hasilnya: operasional lebih efisien dan keputusan diambil berdasarkan data, bukan perkiraan.
+SIMPERSA menghubungkan seluruh rantai kerja persampahan - dari lapangan, administrasi, keuangan, hingga meja owner - dalam satu sistem dengan data yang konsisten dan otomatisasi yang mengurangi pekerjaan manual. Hasilnya: operasional lebih efisien dan keputusan diambil berdasarkan data, bukan perkiraan.
 
 ---
 

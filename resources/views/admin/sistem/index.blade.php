@@ -16,7 +16,7 @@
                     <span class="text-2xl">📢</span>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900">Penyiaran Notifikasi Penagihan Bulanan</h3>
-                        <p class="text-sm text-gray-500 mt-0.5">Kirim pesan peringatan otomatis kepada pelanggan yang status tagihan iurannya masih "Belum Bayar".</p>
+                        <p class="text-sm text-gray-500 mt-0.5">Kirim pesan peringatan otomatis kepada warga yang status tagihan iurannya masih "Belum Bayar".</p>
                     </div>
                 </div>
                 <div class="mt-4 pt-4 border-t flex items-center justify-between">
@@ -38,7 +38,7 @@
                     <span class="text-2xl">💾</span>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900">Pusat Cadangan Basis Data (Database Backup)</h3>
-                        <p class="text-sm text-gray-500 mt-0.5">Unduh berkas cadangan berekstensi .sql secara langsung untuk mengamankan data iuran, log pengangkutan, dan rute pelanggan.</p>
+                        <p class="text-sm text-gray-500 mt-0.5">Unduh berkas cadangan berekstensi .sql secara langsung untuk mengamankan data iuran, log pengangkutan, dan rute warga.</p>
                     </div>
                 </div>
                 <div class="mt-4 pt-4 border-t flex justify-end">

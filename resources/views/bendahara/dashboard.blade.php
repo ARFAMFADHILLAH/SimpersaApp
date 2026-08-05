@@ -35,7 +35,7 @@
                         <div class="text-2xl font-black text-green-600 mt-2">
                             Rp {{ number_format($totalNominalTunggakan, 0, ',', '.') }}
                         </div>
-                        <span class="text-[10px] text-green-700 font-semibold mt-1 block">Dari {{ $totalPelangganMenunggak }} Pelanggan</span>
+                        <span class="text-[10px] text-green-700 font-semibold mt-1 block">Dari {{ $totalWargaMenunggak }} Warga</span>
                     </div>
                 </div>
 
@@ -49,7 +49,7 @@
                             @forelse($transaksiTerbaru as $iuran)
                                 <div class="p-3 flex justify-between items-center text-xs">
                                     <div>
-                                        <p class="font-semibold text-gray-800">{{ $iuran->pelanggan->user->name ?? 'Warga' }}</p>
+                                        <p class="font-semibold text-gray-800">{{ $iuran->warga->user->name ?? 'Warga' }}</p>
                                         <p class="text-[10px] text-gray-400">Periode: {{ $iuran->bulan_tagihan }}</p>
                                     </div>
                                     <span class="font-bold text-green-600">+ Rp {{ number_format($iuran->jumlah_tagihan, 0, ',', '.') }}</span>

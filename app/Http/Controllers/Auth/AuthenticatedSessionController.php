@@ -34,25 +34,21 @@ class AuthenticatedSessionController extends Controller
     $roleName = strtolower(trim($roleName));
 
     // JANGAN gunakan redirect()->intended() bawaan Breeze jika ia terus memaksa ke /dashboard
-    if ($roleName === 'administrator' || $roleName === 'admin') {
+    if (in_array($roleName, ['admin', 'administrator', 'administrasi', 'petugas_administrasi'])) {
         return redirect()->route('admin.dashboard');
     }
 
-    if ($roleName === 'manajer' || $roleName === 'manager') {
-        return redirect()->route('manager.dashboard');
+    if ($roleName === 'owner') {
+        return redirect()->route('owner.dashboard');
     }
 
     if ($roleName === 'bendahara') {
         return redirect()->route('bendahara.dashboard');
     }
 
-    if ($roleName === 'petugas_administrasi' || $roleName === 'administrasi') {
-        return redirect()->route('administrasi.dashboard');
-    }
-
-       // PENGECEKAN UNTUK PELANGGAN ---
-    if ($roleName === 'pelanggan' || $roleName === 'warga') {
-        return redirect()->route('pelanggan.dashboard');
+       // PENGECEKAN UNTUK WARGA ---
+    if ($roleName === 'warga' || $roleName === 'warga') {
+        return redirect()->route('warga.dashboard');
     }
 
         // --- TAMBAHKAN PENGECEKAN UNTUK PETUGAS (OPSIONAL) ---

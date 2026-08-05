@@ -25,11 +25,17 @@ class AbsensiController extends Controller
             return redirect()->back()->with('error', 'Anda sudah melakukan Clock-In hari ini.');
         }
 
+        $fotoMasuk = null;
+        if ($request->hasFile('foto_masuk')) {
+            $fotoMasuk = $request->file('foto_masuk')->store('absensi', 'public');
+        }
+
         AbsensiPetugas::updateOrCreate(
             ['user_id' => $userId, 'tanggal' => $today],
             [
                 'jam_masuk' => Carbon::now()->toTimeString(),
-                'status' => 'hadir'
+                'status' => 'hadir',
+                'foto_masuk' => $fotoMasuk
             ]
         );
 
@@ -54,8 +60,14 @@ class AbsensiController extends Controller
             return redirect()->back()->with('error', 'Anda sudah melakukan Clock-Out hari ini.');
         }
 
+        $fotoPulang = null;
+        if ($request->hasFile('foto_pulang')) {
+            $fotoPulang = $request->file('foto_pulang')->store('absensi', 'public');
+        }
+
         $absensi->update([
             'jam_pulang' => Carbon::now()->toTimeString(),
+            'foto_pulang' => $fotoPulang,
         ]);
 
         return redirect()->back()->with('success', 'Berhasil Clock-Out! Hati-hati di jalan.');

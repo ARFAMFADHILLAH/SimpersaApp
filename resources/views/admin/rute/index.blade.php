@@ -12,7 +12,7 @@
             <!-- Form Tambah Rute -->
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Tambah Master Rute Baru</h3>
-                <form action="{{ route('admin.rute.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <form action="{{ route('admin.rute.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Nama Wilayah / Rute</label>
@@ -22,13 +22,18 @@
                         <label class="block text-sm font-medium text-gray-700">Jadwal Hari Angkut</label>
                         <input type="text" name="hari_angkut" placeholder="Contoh: Senin, Rabu, Jumat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Titik Koordinat Pusat</label>
-                        <input type="text" name="titik_koordinat_pusat" placeholder="Contoh: -6.2088,106.8456" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
                     <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 justify-center py-2.5">
                         {{ __('Simpan Rute') }}
                     </x-primary-button>
+                    <div class="md:col-span-3">
+                        <label class="block text-sm font-medium text-gray-700">Titik Pusat Rute (opsional)</label>
+                        <x-lokasi-picker
+                            map-id="mapRuteBaru"
+                            mode="string"
+                            string-name="titik_koordinat_pusat"
+                            hint="Klik pada peta untuk menandai titik pusat wilayah rute."
+                        />
+                    </div>
                 </form>
             </div>
 
@@ -58,7 +63,7 @@
                                         <span class="text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="p-3 text-sm text-gray-600">{{ $rt->pelanggan_count }} Pelanggan</td>
+                                <td class="p-3 text-sm text-gray-600">{{ $rt->warga_count }} Warga</td>
                                 <td class="p-3 text-sm">
                                     <a href="{{ route('admin.rute.peta', $rt->id) }}" class="inline-flex items-center px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded">
                                         🗺️ Lihat Peta Digital

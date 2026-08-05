@@ -19,8 +19,16 @@
 
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Proses Penggajian Otomatis</h3>
-                    <p class="text-sm text-gray-500 mb-4">
-                        Sistem akan menghitung gaji berdasarkan absensi: Gaji Pokok (Rp1.500.000) + Insentif $25.000/hadir + Bonus $200.000 (jika hadir >= 20 hari) - Potongan Alpha $50.000/hari.
+                    <p class="text-sm text-gray-500 mb-2">
+                        Sistem menghitung gaji berdasarkan absensi dengan parameter berikut
+                        (diatur oleh admin di <span class="font-semibold text-gray-700">Pengaturan Gaji</span>):
+                    </p>
+                    <p class="text-sm text-gray-700 mb-4">
+                        Gaji Pokok <span class="font-semibold">Rp {{ number_format($pengaturan->gaji_pokok, 0, ',', '.') }}</span>
+                        + Insentif <span class="font-semibold">Rp {{ number_format($pengaturan->insentif_per_hadir, 0, ',', '.') }}/hadir</span>
+                        + Bonus <span class="font-semibold">Rp {{ number_format($pengaturan->bonus_amount, 0, ',', '.') }}</span> (jika hadir &ge; {{ $pengaturan->minimal_hadir_bonus }} hari)
+                        - Potongan Alpha <span class="font-semibold">Rp {{ number_format($pengaturan->potongan_alpha_per_hari, 0, ',', '.') }}/hari</span>
+                        - Potongan Izin <span class="font-semibold">Rp {{ number_format($pengaturan->potongan_izin_per_hari, 0, ',', '.') }}/hari</span>.
                     </p>
                     <form action="{{ route('bendahara.penggajian.proses') }}" method="POST" class="flex items-end gap-4">
                         @csrf

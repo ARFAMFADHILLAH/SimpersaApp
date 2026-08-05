@@ -12,7 +12,7 @@ class Pengaduan extends Model
     protected $table = 'pengaduan';
 
     protected $fillable = [
-        'pelanggan_id',
+        'warga_id',
         'tipe_kendala',
         'catatan_lokasi',
         'foto_bukti',
@@ -22,10 +22,15 @@ class Pengaduan extends Model
     ];
 
     /**
-     * Relasi balik ke Pelanggan
+     * Relasi balik ke Warga
      */
-    public function pelanggan()
+    public function warga()
     {
-        return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
+        return $this->belongsTo(Warga::class, 'warga_id');
+    }
+
+    public function petugas()
+    {
+        return $this->belongsTo(User::class, 'petugas_id');
     }
 }

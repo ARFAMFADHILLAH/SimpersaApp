@@ -34,11 +34,11 @@ class BendaharaController extends Controller
         $sisaKasBersih = $totalPemasukanBulanIni - $totalPengeluaranBulanIni;
 
         // 3. MONITORING TUNGGAKAN IURAN
-        $totalPelangganMenunggak = Iuran::where('status_pembayaran', 'Belum Lunas')->count();
-        $totalNominalTunggakan = Iuran::where('status_pembayaran', 'Belum Lunas')->sum('jumlah_tagihan');
+        $totalWargaMenunggak = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->count();
+        $totalNominalTunggakan = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->sum('jumlah_tagihan');
 
         // Transaksi Pemasukan & Pengeluaran Terbaru
-        $transaksiIuranTerbaru = Iuran::with('pelanggan.user')
+        $transaksiIuranTerbaru = Iuran::with('warga.user')
             ->where('status_pembayaran', 'Lunas')
             ->latest('tanggal_bayar')
             ->take(5)
@@ -54,7 +54,7 @@ class BendaharaController extends Controller
             'totalGajiBulanIni',
             'totalOperasionalBulanIni',
             'sisaKasBersih',
-            'totalPelangganMenunggak',
+            'totalWargaMenunggak',
             'totalNominalTunggakan',
             'transaksiIuran',
             'operasionalTerbaru'

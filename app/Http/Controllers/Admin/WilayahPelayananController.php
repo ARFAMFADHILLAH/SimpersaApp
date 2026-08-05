@@ -13,8 +13,8 @@ class WilayahPelayananController extends Controller
      */
     public function index()
     {
-        // Ambil data wilayah dengan jumlah pelanggannya
-        $wilayahs = Wilayah::withCount('pelanggan')->latest()->get();
+        // Ambil data wilayah dengan jumlah warganya
+        $wilayahs = Wilayah::withCount('warga')->latest()->get();
 
         return view('admin.wilayah.index', compact('wilayahs'));
     }
@@ -76,11 +76,11 @@ class WilayahPelayananController extends Controller
      */
     public function destroy($id)
     {
-        $wilayah = Wilayah::withCount('pelanggan')->findOrFail($id);
+        $wilayah = Wilayah::withCount('warga')->findOrFail($id);
 
-        // Mencegah hapus jika wilayah masih digunakan oleh pelanggan
-        if ($wilayah->pelanggan_count > 0) {
-            return redirect()->back()->with('error', 'Gagal menghapus! Wilayah ini masih terikat dengan ' . $wilayah->pelanggan_count . ' data pelanggan.');
+        // Mencegah hapus jika wilayah masih digunakan oleh warga
+        if ($wilayah->warga_count > 0) {
+            return redirect()->back()->with('error', 'Gagal menghapus! Wilayah ini masih terikat dengan ' . $wilayah->warga_count . ' data warga.');
         }
 
         $wilayah->delete();

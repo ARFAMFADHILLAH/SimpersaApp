@@ -21,156 +21,152 @@
                 </div>
             </div>
 
-            <!-- Daftar Pelanggan / Titik di Rute Ini -->
+            <!-- Peta Rute -->
+            @php
+                $titikPeta = $rute->warga->filter(fn ($w) => $w->latitude && $w->longitude)->values();
+            @endphp
+            <div class="bg-white shadow-sm sm:rounded-2xl border border-gray-100 overflow-hidden">
+                <div class="p-4 bg-gray-50/70 border-b border-gray-100 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-sm text-gray-800">Peta Rute</h4>
+                        <p class="text-xs text-gray-400">Titik rumah warga pada rute ini</p>
+                    </div>
+                    @if($titikPeta->isNotEmpty())
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">{{ $titikPeta->count() }} titik</span>
+                    @endif
+                </div>
+                @if($titikPeta->isEmpty())
+                    <div class="p-6 text-center text-xs text-gray-400">
+                        Belum ada koordinat titik pada rute ini.
+                    </div>
+                @else
+                    <div id="petaRute" class="h-72 w-full"></div>
+                @endif
+            </div>
+
+            <!-- Daftar Warga / Titik di Rute Ini -->
             <div class="bg-white shadow-sm sm:rounded-2xl border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100">
-                    <h3 class="text-md font-bold text-gray-900">Daftar Pelanggan pada Rute Ini</h3>
+                    <h3 class="text-md font-bold text-gray-900">Daftar Warga pada Rute Ini</h3>
                     <p class="text-xs text-gray-500">Titik-titik tujuan pengangkutan sampah.</p>
                 </div>
 
-            <!-- Form Upload Foto Dokumentasi (Sebelum & Sesudah) -->
-<div class="bg-white shadow-sm sm:rounded-2xl p-6 border border-gray-100 space-y-4">
-    <h3 class="text-md font-bold text-gray-900">Upload Dokumentasi Pengangkutan</h3>
-    <p class="text-xs text-gray-500">Unggah foto kondisi di lapangan sebelum dan sesudah proses pengangkutan sampah.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50/75 border-b border-gray-100 text-gray-600 text-xs uppercase tracking-wider">
+                                <th class="p-4 font-bold">No</th>
+                                <th class="p-4 font-bold">Nama Warga</th>
+                                <th class="p-4 font-bold">Alamat</th>
+                                <th class="p-4 font-bold">Hasil Angkut</th>
+                                <th class="p-4 font-bold text-center">Status & Dokumentasi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @forelse($rute->warga ?? [] as $index => $warga)
+                                @php
+                                    $tugas = $pengangkutan[$warga->id] ?? null;
+                                    $sudahSelesai = $tugas && $tugas->status_tugas == 'Selesai';
+                                @endphp
+                                <tr class="hover:bg-gray-50/50 transition">
+                                    <td class="p-4 text-xs text-gray-500">{{ $index + 1 }}</td>
+                                    <td class="p-4 font-medium text-gray-900">{{ $warga->user->name ?? 'Warga' }}</td>
+                                    <td class="p-4 text-xs text-gray-600">
+                                        {{ $warga->alamat_lengkap ?? '-' }}
+                                        @if($warga->latitude && $warga->longitude)
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ $warga->latitude }},{{ $warga->longitude }}" target="_blank" class="text-emerald-600 hover:underline font-semibold block mt-0.5">Buka Peta &rarr;</a>
+                                        @endif
+                                    </td>
+                                    <td class="p-4 text-xs text-gray-600">
+                                        @if($tugas && ($tugas->volume_m3 || $tugas->berat_kg))
+                                            Vol: {{ $tugas->volume_m3 ?? '-' }} m³ | Brt: {{ $tugas->berat_kg ?? '-' }} kg
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td class="p-4 text-center space-y-2">
+                                        @if($sudahSelesai)
+                                            <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full inline-block">
+                                                Selesai
+                                            </span>
+                                            @if($tugas->foto_sebelum || $tugas->foto_sesudah)
+                                                <div class="flex justify-center gap-2 mt-2">
+                                                    @if($tugas->foto_sebelum)
+                                                        <a href="{{ asset('storage/dokumentasi/' . $tugas->foto_sebelum) }}" target="_blank" title="Lihat Foto Sebelum">
+                                                            <img src="{{ asset('storage/dokumentasi/' . $tugas->foto_sebelum) }}" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
+                                                        </a>
+                                                    @endif
+                                                    @if($tugas->foto_sesudah)
+                                                        <a href="{{ asset('storage/dokumentasi/' . $tugas->foto_sesudah) }}" target="_blank" title="Lihat Foto Sesudah">
+                                                            <img src="{{ asset('storage/dokumentasi/' . $tugas->foto_sesudah) }}" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                                @if($tugas->catatan)
+                                                    <p class="text-[10px] text-gray-500 italic mt-1">Catatan: "{{ $tugas->catatan }}"</p>
+                                                @endif
+                                            @endif
+                                        @else
+                                            <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full inline-block">
+                                                Belum Diangkut
+                                            </span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-gray-400 text-sm">
+                                        Belum ada data warga yang terdaftar pada rute ini.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-<form action="{{ route('petugas.rute.upload', $rute->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-    @csrf
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Foto Sebelum -->
-        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <label class="block text-xs font-bold text-gray-700 mb-1">Foto Sebelum Pengangkutan</label>
-            <input type="file" name="foto_sebelum" accept="image/*" required class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 border border-gray-200 rounded-xl cursor-pointer">
-        </div>
-
-        <!-- Foto Sesudah -->
-        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <label class="block text-xs font-bold text-gray-700 mb-1">Foto Sesudah Pengangkutan</label>
-            <input type="file" name="foto_sesudah" accept="image/*" required class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-gray-200 rounded-xl cursor-pointer">
-        </div>
+            </div>
+        </main>
     </div>
 
-    <div>
-        <label class="block text-xs font-bold text-gray-700 mb-1">Catatan / Keterangan Lapangan</label>
-        <textarea name="catatan" rows="2" class="w-full text-xs border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-emerald-500" placeholder="Tuliskan kendala atau catatan kondisi area di sini..."></textarea>
-    </div>
-
-    <button type="submit" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow transition">
-        Simpan & Unggah Dokumentasi
-    </button>
-</form>
-</div>
-
-<div class="bg-white shadow-sm sm:rounded-2xl p-6 border border-gray-100 space-y-4 mt-6">
-    <h3 class="text-md font-bold text-gray-900">Hasil Dokumentasi Pengangkutan</h3>
-    
-                @php
-                    $firstPelanggan = $rute->pelanggan->first();
-                    $pengangkutan = $firstPelanggan ? \DB::table('pengangkutan')->where('pelanggan_id', $firstPelanggan->id)->first() : null;
-                @endphp
-
-    @if($pengangkutan && ($pengangkutan->foto_sebelum || $pengangkutan->foto_sesudah))
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Foto Sebelum -->
-            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
-                <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">Foto Sebelum</span>
-                @if($pengangkutan->foto_sebelum)
-                    <div class="mt-2">
-                        <img src="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sebelum) }}" alt="Foto Sebelum" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm">
-                    </div>
-                @else
-                    <p class="text-xs text-gray-400 mt-2">Belum ada foto.</p>
-                @endif
-            </div>
-
-            <!-- Foto Sesudah -->
-            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
-                <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">Foto Sesudah</span>
-                @if($pengangkutan->foto_sesudah)
-                    <div class="mt-2">
-                        <img src="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sesudah) }}" alt="Foto Sesudah" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm">
-                    </div>
-                @else
-                    <p class="text-xs text-gray-400 mt-2">Belum ada foto.</p>
-                @endif
-            </div>
-        </div>
-
-        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 mt-4">
-            <span class="text-xs font-bold text-gray-700">Catatan Lapangan:</span>
-            <p class="text-xs text-gray-600 mt-1">{{ $pengangkutan->catatan ?? 'Tidak ada catatan.' }}</p>
-        </div>
-    @else
-        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
-            <p class="text-xs text-gray-400">Belum ada dokumentasi foto yang diunggah untuk titik ini.</p>
-        </div>
-    @endif
-</div>
-
-<div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-        <thead>
-            <tr class="bg-gray-50/75 border-b border-gray-100 text-gray-600 text-xs uppercase tracking-wider">
-                <th class="p-4 font-bold">No</th>
-                <th class="p-4 font-bold">Nama Pelanggan</th>
-                <th class="p-4 font-bold">Alamat</th>
-                <th class="p-4 font-bold text-center">Status & Dokumentasi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 text-sm">
-            @forelse($rute->pelanggan ?? [] as $index => $pelanggan)
-                @php
-                    // Ambil data pengangkutan yang sesuai dengan pelanggan ini
-                    $pengangkutan = \DB::table('pengangkutan')->where('pelanggan_id', $pelanggan->id)->first();
-                @endphp
-                <tr class="hover:bg-gray-50/50 transition">
-                    <td class="p-4 text-xs text-gray-500">{{ $index + 1 }}</td>
-                    <td class="p-4 font-medium text-gray-900">{{ $pelanggan->user->name ?? 'Warga' }}</td>
-                    <td class="p-4 text-xs text-gray-600">{{ $pelanggan->alamat_lengkap ?? '-' }}</td>
-                    <td class="p-4 text-center space-y-2">
-                        @if($pengangkutan && $pengangkutan->status_tugas == 'Selesai')
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full inline-block">
-                                Selesai
-                            </span>
-                            
-                            <!-- Preview Thumbnail Foto Jika Ada -->
-                            @if($pengangkutan->foto_sebelum || $pengangkutan->foto_sesudah)
-                                <div class="flex justify-center gap-2 mt-2">
-                                    @if($pengangkutan->foto_sebelum)
-                                        <a href="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sebelum) }}" target="_blank" title="Lihat Foto Sebelum">
-                                            <img src="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sebelum) }}" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
-                                        </a>
-                                    @endif
-                                    @if($pengangkutan->foto_sesudah)
-                                        <a href="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sesudah) }}" target="_blank" title="Lihat Foto Sesudah">
-                                            <img src="{{ asset('storage/dokumentasi/' . $pengangkutan->foto_sesudah) }}" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
-                                        </a>
-                                    @endif
-                                </div>
-                                @if($pengangkutan->catatan)
-                                    <p class="text-[10px] text-gray-500 italic mt-1">Catatan: "{{ $pengangkutan->catatan }}"</p>
-                                @endif
-                            @endif
-                        @else
-                            <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full inline-block">
-                                Belum Diangkut
-                            </span>
-                        @endif
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="4" class="p-8 text-center text-gray-400 text-sm">
-                        Belum ada data pelanggan yang terdaftar pada rute ini.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-            </div>
-
-        </div>
-    </main>
     <x-petugas-bottom-nav />
+
+    @if($titikPeta->isNotEmpty())
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            var map = L.map('petaRute');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            @php
+                $titikJson = $titikPeta->map(function ($w, $key) {
+                    return [
+                        'no' => $key + 1,
+                        'lat' => (float) $w->latitude,
+                        'lng' => (float) $w->longitude,
+                        'nama' => $w->user->name ?? 'Warga',
+                        'alamat' => $w->alamat_lengkap ?? '',
+                        'link' => 'https://www.google.com/maps/search/?api=1&query=' . $w->latitude . ',' . $w->longitude,
+                    ];
+                })->values();
+            @endphp
+            var titik = @json($titikJson);
+
+            var markers = [];
+            titik.forEach(function (t) {
+                var marker = L.marker([t.lat, t.lng]).addTo(map);
+                marker.bindPopup(
+                    '<strong>#' + t.no + '. ' + t.nama + '</strong><br>' +
+                    '<span style="font-size:11px">' + t.alamat + '</span><br>' +
+                    '<a href="' + t.link + '" target="_blank" style="font-size:11px;font-weight:bold">Buka Navigasi &rarr;</a>'
+                );
+                markers.push(marker);
+            });
+
+            var bounds = L.latLngBounds(markers.map(function (m) { return m.getLatLng(); }));
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+        </script>
+    @endif
 </x-app-layout>

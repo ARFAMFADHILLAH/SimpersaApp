@@ -27,9 +27,9 @@
         <table>
             <tr><td class="label">No. Kwitansi</td><td>: KW-{{ str_pad($iuran->id, 5, '0', STR_PAD_LEFT) }}</td></tr>
             <tr><td class="label">Tanggal Bayar</td><td>: {{ $iuran->tanggal_bayar ? date('d/m/Y', strtotime($iuran->tanggal_bayar)) : '-' }}</td></tr>
-            <tr><td class="label">Nama Pelanggan</td><td>: {{ $iuran->pelanggan->user->name ?? '-' }}</td></tr>
-            <tr><td class="label">No. Pelanggan</td><td>: {{ $iuran->pelanggan->no_pelanggan ?? '-' }}</td></tr>
-            <tr><td class="label">Alamat</td><td>: {{ $iuran->pelanggan->alamat_lengkap ?? '-' }}</td></tr>
+            <tr><td class="label">Nama Warga</td><td>: {{ $iuran->warga->user->name ?? '-' }}</td></tr>
+            <tr><td class="label">No. Warga</td><td>: {{ $iuran->warga->no_warga ?? '-' }}</td></tr>
+            <tr><td class="label">Alamat</td><td>: {{ $iuran->warga->alamat_lengkap ?? '-' }}</td></tr>
             <tr><td class="label">Periode</td><td>: {{ $iuran->bulan_tagihan }}</td></tr>
             <tr><td class="label">Metode Bayar</td><td>: {{ $iuran->metode_pembayaran }}</td></tr>
         </table>

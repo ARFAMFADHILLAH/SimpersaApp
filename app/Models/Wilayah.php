@@ -16,10 +16,10 @@ class Wilayah extends Model
         'cakupan_area',
     ];
 
-    // Relasi ke Pelanggan (Satu wilayah punya banyak pelanggan)
-    public function pelanggan()
+    // Relasi ke Warga (Satu wilayah punya banyak warga)
+    public function warga()
     {
-        return $this->hasMany(Pelanggan::class, 'wilayah_pelayanan_id');
+        return $this->hasMany(Warga::class, 'wilayah_pelayanan_id');
     }
 }
 

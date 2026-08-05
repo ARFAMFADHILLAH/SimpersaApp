@@ -26,7 +26,7 @@
                                 <th class="p-4 font-bold">No</th>
                                 <th class="p-4 font-bold">Nama Rute</th>
                                 <th class="p-4 font-bold">Hari Angkut</th>
-                                <th class="p-4 font-bold">Jumlah Pelanggan</th>
+                                <th class="p-4 font-bold">Jumlah Warga</th>
                                 <th class="p-4 font-bold text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -41,7 +41,7 @@
                                         </span>
                                     </td>
                                     <td class="p-4 text-xs text-gray-600">
-                                        {{ $rute->pelanggan_count ?? 0 }} Titik
+                                        {{ $rute->warga_count ?? 0 }} Titik
                                     </td>
                                     <td class="p-4 text-center">
                                         <a href="{{ route('petugas.rute.detail', $rute->id) }}" 

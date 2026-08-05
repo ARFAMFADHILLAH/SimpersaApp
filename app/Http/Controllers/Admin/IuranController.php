@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Iuran;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use App\Models\PengaturanIuran;
 use Illuminate\Http\Request;
 
@@ -12,7 +12,7 @@ class IuranController extends Controller
 {
     public function index()
     {
-        $dataIuran = Iuran::with('pelanggan.user')->latest()->get();
+        $dataIuran = Iuran::with('warga.user')->latest()->get();
 
         // Ambil pengaturan iuran (jika belum ada, buat default)
         $pengaturan = PengaturanIuran::firstOrCreate([], [
@@ -35,7 +35,12 @@ class IuranController extends Controller
             'tgl_jatuh_tempo'            => 'required|numeric|min:1|max:31',
         ]);
 
-        $pengaturan = PengaturanIuran::first();
+        $pengaturan = PengaturanIuran::firstOrCreate([
+            'tarif_dasar_bulanan' => 20000,
+            'persentase_denda_per_bulan' => 5,
+            'nominal_denda_flat' => 5000,
+            'tgl_jatuh_tempo' => 10,
+        ]);
         $pengaturan->update($validated);
 
         return redirect()->back()->with('success', 'Parameter tarif & denda berhasil diperbarui!');
@@ -47,18 +52,18 @@ class IuranController extends Controller
         $pengaturan = PengaturanIuran::first();
         $bulanSekarang = date('Y-m'); // Format: YYYY-MM
 
-        $pelanggan = Pelanggan::all();
+        $warga = Warga::all();
 
         $generatedCount = 0;
-        foreach ($pelanggan as $p) {
+        foreach ($warga as $p) {
             // Cek apakah tagihan bulan ini sudah ada
-            $exists = Iuran::where('pelanggan_id', $p->id)
+            $exists = Iuran::where('warga_id', $p->id)
                 ->where('bulan_tagihan', $bulanSekarang)
                 ->exists();
 
             if (!$exists) {
                 Iuran::create([
-                    'pelanggan_id'      => $p->id,
+                    'warga_id'      => $p->id,
                     'bulan_tagihan'     => $bulanSekarang,
                     'jumlah_tagihan'    => $pengaturan->tarif_dasar_bulanan,
                     'denda'             => 0,

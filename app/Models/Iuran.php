@@ -9,17 +9,18 @@ class Iuran extends Model
     protected $table = 'iuran';
 
     protected $fillable = [
-        'pelanggan_id',
+        'warga_id',
         'bulan_tagihan',
         'jumlah_tagihan',
         'denda',
         'status_pembayaran',
         'tanggal_bayar',
-        'metode_pembayaran'
+        'metode_pembayaran',
+        'bukti_pembayaran'
     ];
 
-    public function pelanggan()
+    public function warga()
     {
-        return $this->belongsTo(Pelanggan::class);
+        return $this->belongsTo(Warga::class);
     }
 }

@@ -3,11 +3,10 @@
         $role = strtolower(auth()->user()->role->name ?? '');
         $sidebar = match (true) {
             str_contains($role, 'admin') => 'admin',
-            str_contains($role, 'manager') || str_contains($role, 'manajer') => 'manager',
+            str_contains($role, 'owner') => 'owner',
             str_contains($role, 'bendahara') => 'bendahara',
-            str_contains($role, 'administrasi') => 'administrasi',
-            str_contains($role, 'petugas') || str_contains($role, 'supir') || str_contains($role, 'pengangkut') => 'petugas',
-            default => 'pelanggan',
+            str_contains($role, 'petugas') => 'petugas',
+            default => 'warga',
         };
     @endphp
     <div class="flex flex-col md:flex-row min-h-screen bg-gray-50 pb-24 md:pb-0">

@@ -18,7 +18,7 @@
                     <thead>
                         <tr class="border-b bg-gray-50">
                             <th class="p-3 text-sm font-semibold text-gray-600">Tanggal</th>
-                            <th class="p-3 text-sm font-semibold text-gray-600">Pelanggan</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Warga</th>
                             <th class="p-3 text-sm font-semibold text-gray-600">Petugas & Armada</th>
                             <th class="p-3 text-sm font-semibold text-gray-600">Hasil Sampah</th>
                             <th class="p-3 text-sm font-semibold text-gray-600">Status</th>
@@ -29,8 +29,8 @@
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="p-3 text-sm text-gray-700">{{ $p->tanggal_tugas }}</td>
                                 <td class="p-3 text-sm text-gray-900 font-medium">
-                                    {{ $p->pelanggan->user->name }} <br>
-                                    <span class="text-xs text-gray-400">({{ $p->pelanggan->no_pelanggan }})</span>
+                                    {{ $p->warga->user->name }} <br>
+                                    <span class="text-xs text-gray-400">({{ $p->warga->no_warga }})</span>
                                 </td>
                                 <td class="p-3 text-sm text-gray-700">
                                     Ptg: {{ $p->petugas->name }} <br>

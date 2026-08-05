@@ -21,6 +21,8 @@
                                 <th class="p-3 text-sm font-semibold text-gray-600">Jam Masuk</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600">Jam Pulang</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600">Status</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600">Foto Masuk</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600">Foto Pulang</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,10 +37,28 @@
                                             {{ ucfirst($absen->status) }}
                                         </span>
                                     </td>
+                                    <td class="p-3 text-sm">
+                                        @if($absen->foto_masuk)
+                                            <a href="{{ asset('storage/' . $absen->foto_masuk) }}" target="_blank">
+                                                <img src="{{ asset('storage/' . $absen->foto_masuk) }}" class="w-12 h-12 object-cover rounded-lg border shadow-sm hover:scale-105 transition" alt="Foto masuk">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="p-3 text-sm">
+                                        @if($absen->foto_pulang)
+                                            <a href="{{ asset('storage/' . $absen->foto_pulang) }}" target="_blank">
+                                                <img src="{{ asset('storage/' . $absen->foto_pulang) }}" class="w-12 h-12 object-cover rounded-lg border shadow-sm hover:scale-105 transition" alt="Foto pulang">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="p-4 text-center text-sm text-gray-500">Belum ada riwayat absensi.</td>
+                                    <td colspan="6" class="p-4 text-center text-sm text-gray-500">Belum ada riwayat absensi.</td>
                                 </tr>
                             @endforelse
                         </tbody>

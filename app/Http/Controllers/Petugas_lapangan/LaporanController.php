@@ -39,6 +39,6 @@ class LaporanController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('petugas.laporan')->with('success', 'Laporan kendala berhasil dikirim ke Admin!');
+        return redirect()->route('petugas.laporan.index')->with('success', 'Laporan kendala berhasil dikirim ke Admin!');
     }
 }

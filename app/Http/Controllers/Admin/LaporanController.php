@@ -27,7 +27,7 @@ class LaporanController extends Controller
         $selesai = $request->tanggal_selesai;
 
         // Tarik data berdasarkan rentang waktu
-        $iuran = Iuran::with('pelanggan.user')
+        $iuran = Iuran::with('warga.user')
             ->whereBetween('tanggal_bayar', [$mulai, $selesai])
             ->where('status_pembayaran', 'Lunas')
             ->get();
@@ -40,7 +40,7 @@ class LaporanController extends Controller
             ->whereBetween('tanggal_pengeluaran', [$mulai, $selesai])
             ->get();
 
-        $pengangkutan = Pengangkutan::with(['pelanggan.user', 'petugas'])
+        $pengangkutan = Pengangkutan::with(['warga.user', 'petugas'])
             ->whereBetween('tanggal_tugas', [$mulai, $selesai])
             ->get();
 

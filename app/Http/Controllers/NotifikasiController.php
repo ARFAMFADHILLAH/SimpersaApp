@@ -13,6 +13,22 @@ class NotifikasiController extends Controller
             ->latest()
             ->paginate(15);
 
+        // Remap defensif: role admin (gabungan) tidak punya halaman administrasi,
+        // jadi alihkan tautan pengaduan lama yang masih menuju ke sana.
+        $isAdmin = in_array(strtolower(auth()->user()->role->name ?? ''), ['admin', 'administrator', 'administrasi', 'petugas_administrasi']);
+        if ($isAdmin) {
+            $notifikasi->getCollection()->transform(function ($item) {
+                if ($item->tautan && str_contains($item->tautan, '/administrasi/pengaduan/')) {
+                    $item->tautan = preg_replace(
+                        '#administrasi/pengaduan/(\d+)#',
+                        'admin/pengaduan/$1',
+                        $item->tautan
+                    );
+                }
+                return $item;
+            });
+        }
+
         return view('notifikasi.index', compact('notifikasi'));
     }
 

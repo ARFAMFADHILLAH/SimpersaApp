@@ -47,13 +47,13 @@ class RegisteredUserController extends Controller
             'status' => 'aktif',
         ]);
 
-        // 2. Jika pendaftar memilih Role Pelanggan
-        // Otomatis buatkan baris di tabel pelanggan agar tidak 404 saat membuka dashboard
-        $rolePelangganId = DB::table('roles')->where('name', 'pelanggan')->value('id');
-        if ($rolePelangganId && (int) $request->role_id === (int) $rolePelangganId) {
-            DB::table('pelanggan')->insert([
+        // 2. Jika pendaftar memilih Role Warga
+        // Otomatis buatkan baris di tabel warga agar tidak 404 saat membuka dashboard
+        $roleWargaId = DB::table('roles')->where('name', 'warga')->value('id');
+        if ($roleWargaId && (int) $request->role_id === (int) $roleWargaId) {
+            DB::table('warga')->insert([
                 'user_id' => $user->id,
-                'no_pelanggan' => 'PLG-' . date('Ymd') . '-' . sprintf('%03d', $user->id),
+                'no_warga' => 'WRG-' . date('Ymd') . '-' . sprintf('%03d', $user->id),
                 'no_hp' => '-',
                 'alamat_lengkap' => 'Alamat belum dikonfigurasi',
                 'created_at' => now(),

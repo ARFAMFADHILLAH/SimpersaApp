@@ -7,7 +7,7 @@ use App\Http\Controllers\NotifikasiController;
 // Controller Admin
 use App\Http\Controllers\Admin\TPSController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\WargaController;
 use App\Http\Controllers\Admin\JenisSampahController;
 use App\Http\Controllers\Admin\IuranController;
 use App\Http\Controllers\Admin\LaporanController;
@@ -15,22 +15,27 @@ use App\Http\Controllers\Admin\SistemController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\KeputusanController;
 use App\Http\Controllers\Admin\NotifikasiController as AdminNotifikasiController;
+use App\Http\Controllers\Admin\PengaduanController as AdminPengaduanController;
 use App\Http\Controllers\Admin\ArmadaController;
 use App\Http\Controllers\Admin\WilayahPelayananController;
 use App\Http\Controllers\Admin\RuteController;
 use App\Http\Controllers\Admin\PengangkutanController;
+use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Admin\OperasionalController;
+use App\Http\Controllers\Admin\LogistikController;
+use App\Http\Controllers\Admin\GajiController;
 
 // Controller Manager
-use App\Http\Controllers\Manager\LaporanController as ManagerLaporanCtrl;
-use App\Http\Controllers\Manager\ManagerLaporanController;
-use App\Http\Controllers\Manager\RuteController as ManagerRuteController;
-use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
-use App\Http\Controllers\Manager\ManagerController;
-use App\Http\Controllers\Manager\ManagerArmadaController;
-use App\Http\Controllers\Manager\ManagerDSSController;
-use App\Http\Controllers\Manager\ManagerKeuanganController;
-use App\Http\Controllers\Manager\ManagerPengaduanController;
-use App\Http\Controllers\Manager\PelangganController as ManagerPelangganController;
+use App\Http\Controllers\Owner\LaporanController as ManagerLaporanCtrl;
+use App\Http\Controllers\Owner\ManagerLaporanController;
+use App\Http\Controllers\Owner\RuteController as ManagerRuteController;
+use App\Http\Controllers\Owner\DashboardController as ManagerDashboardController;
+use App\Http\Controllers\Owner\ManagerController;
+use App\Http\Controllers\Owner\ManagerArmadaController;
+use App\Http\Controllers\Owner\ManagerDSSController;
+use App\Http\Controllers\Owner\ManagerKeuanganController;
+use App\Http\Controllers\Owner\ManagerPengaduanController;
+use App\Http\Controllers\Owner\WargaController as ManagerWargaController;
 
 // Controller Petugas Lapangan
 use App\Http\Controllers\Petugas_lapangan\RuteController as PetugasLapanganRuteController;
@@ -41,12 +46,12 @@ use App\Http\Controllers\Petugas_lapangan\PengaduanController as PetugasLapangan
 use App\Http\Controllers\Petugas_lapangan\DashboardController as PetugasLapanganDashboardController;
 use App\Http\Controllers\Petugas_lapangan\GajiController as PetugasLapanganGajiController;
 
-// Controller Pelanggan
-use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboardController;
-use App\Http\Controllers\Pelanggan\ProfileController as PelangganProfileController;
-use App\Http\Controllers\Pelanggan\IuranController as PelangganIuranController;
-use App\Http\Controllers\Pelanggan\PengaduanController as PelangganPengaduanController;
-use App\Http\Controllers\Pelanggan\NotifikasiController as PelangganNotifikasiController;
+// Controller Warga
+use App\Http\Controllers\Warga\DashboardController as WargaDashboardController;
+use App\Http\Controllers\Warga\ProfileController as WargaProfileController;
+use App\Http\Controllers\Warga\IuranController as WargaIuranController;
+use App\Http\Controllers\Warga\PengaduanController as WargaPengaduanController;
+use App\Http\Controllers\Warga\NotifikasiController as WargaNotifikasiController;
 
 // Controller Bendahara
 use App\Http\Controllers\Bendahara\DashboardController as BendaharaDashboardController;
@@ -54,14 +59,6 @@ use App\Http\Controllers\BendaharaIuranController;
 use App\Http\Controllers\BendaharaGajiController;
 use App\Http\Controllers\BendaharaOperasionalController;
 use App\Http\Controllers\BendaharaLaporanController;
-
-// Controller Administrasi
-use App\Http\Controllers\Administrasi\DashboardController as AdministrasiDashboardController;
-use App\Http\Controllers\Administrasi\MasterController as AdministrasiMasterController;
-use App\Http\Controllers\Administrasi\PelangganController as AdministrasiPelangganController;
-use App\Http\Controllers\Administrasi\OperasionalController as AdministrasiOperasionalController;
-use App\Http\Controllers\Administrasi\LogistikController as AdministrasiLogistikController;
-use App\Http\Controllers\Administrasi\PengaduanController as AdministrasiPengaduanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,9 +77,9 @@ Route::middleware('auth')->group(function () {
 });
 
 // =========================================================================
-// AREA KHUSUS ADMINISTRATOR 
+// AREA KHUSUS ADMIN (GABUNGAN SUPER ADMIN & ADMINISTRASI)
 // =========================================================================
-Route::middleware(['auth', 'role:administrator,admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin,administrator,administrasi'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -92,16 +89,20 @@ Route::middleware(['auth', 'role:administrator,admin'])->prefix('admin')->name('
     Route::get('/sistem/backup', [SistemController::class, 'backupDatabase'])->name('sistem.backup');
 
     // Master Data Management
-    Route::resource('/jenis-sampah', JenisSampahController::class)->except(['create', 'edit'])->names('jenis-sampah');
-    Route::resource('/pelanggan', PelangganController::class)->names('pelanggan');
+    Route::resource('/jenis-sampah', JenisSampahController::class)->except(['create', 'edit', 'show'])->names('jenis-sampah');
+    Route::resource('/warga', WargaController::class)->names('warga');
     Route::resource('/armada', ArmadaController::class)->names('armada');
-    Route::resource('/wilayah-pelayanan', WilayahPelayananController::class)->names('wilayah');
-    Route::resource('/tps', TPSController::class)->except(['create', 'edit'])->names('tps');
-    Route::resource('/users', UserController::class)->names('users');
+    Route::resource('/wilayah-pelayanan', WilayahPelayananController::class)->except(['create', 'show'])->names('wilayah');
+    Route::resource('/tps', TPSController::class)->except(['create', 'edit', 'show'])->names('tps');
+    Route::resource('/users', UserController::class)->except('show')->names('users');
 
     // Parameter & Rule Configurations
     Route::get('/iuran/pengaturan', [IuranController::class, 'index'])->name('iuran.index');
     Route::put('/iuran/pengaturan', [IuranController::class, 'updatePengaturan'])->name('iuran.update-pengaturan');
+
+    // Parameter Penggajian Petugas
+    Route::get('/gaji/pengaturan', [GajiController::class, 'index'])->name('gaji.index');
+    Route::put('/gaji/pengaturan', [GajiController::class, 'updatePengaturan'])->name('gaji.update-pengaturan');
 
     // Monitoring & GIS Rute (Read/Setup Only)
     Route::get('/rute/{id}/peta', [RuteController::class, 'peta'])->name('rute.peta');
@@ -129,12 +130,37 @@ Route::middleware(['auth', 'role:administrator,admin'])->prefix('admin')->name('
     Route::post('/notifikasi/jadwal', [AdminNotifikasiController::class, 'storeJadwal'])->name('notifikasi.jadwal.store');
     Route::put('/notifikasi/jadwal/{id}', [AdminNotifikasiController::class, 'updateJadwal'])->name('notifikasi.jadwal.update');
     Route::delete('/notifikasi/jadwal/{id}', [AdminNotifikasiController::class, 'destroyJadwal'])->name('notifikasi.jadwal.destroy');
+
+    // Monitoring Pengaduan (Monitoring + Verifikasi & Dispatch)
+    Route::get('/pengaduan', [AdminPengaduanController::class, 'index'])->name('pengaduan.index');
+    Route::get('/pengaduan/{id}', [AdminPengaduanController::class, 'show'])->name('pengaduan.show');
+    Route::post('/pengaduan/{id}/verifikasi', [AdminPengaduanController::class, 'verifikasi'])->name('pengaduan.verifikasi');
+    Route::post('/pengaduan/{id}/dispatch', [AdminPengaduanController::class, 'dispatch'])->name('pengaduan.dispatch');
+
+    // Master Data (Edit Warga, TPS, Armada) - dari Panel Administrasi
+    Route::get('/master', [MasterController::class, 'index'])->name('master.index');
+    Route::get('/master/warga/{id}/edit', [MasterController::class, 'editWarga'])->name('master.warga.edit');
+    Route::put('/master/warga/{id}', [MasterController::class, 'updateWarga'])->name('master.warga.update');
+    Route::get('/master/tps/{id}/edit', [MasterController::class, 'editTps'])->name('master.tps.edit');
+    Route::put('/master/tps/{id}', [MasterController::class, 'updateTps'])->name('master.tps.update');
+    Route::get('/master/armada/{id}/edit', [MasterController::class, 'editArmada'])->name('master.armada.edit');
+    Route::put('/master/armada/{id}', [MasterController::class, 'updateArmada'])->name('master.armada.update');
+
+    // Operasional: Rekap Volume & Jadwal Rute / Penugasan - dari Panel Administrasi
+    Route::get('/operasional', [OperasionalController::class, 'index'])->name('operasional.index');
+    Route::get('/operasional/rekap-volume', [OperasionalController::class, 'rekapVolume'])->name('operasional.rekap-volume');
+    Route::get('/operasional/jadwal-rute', [OperasionalController::class, 'jadwalRute'])->name('operasional.jadwal-rute');
+    Route::post('/operasional/tugaskan', [OperasionalController::class, 'tugaskanPetugas'])->name('operasional.tugaskan');
+    Route::post('/operasional/warga/{id}/urut', [OperasionalController::class, 'ubahUrutan'])->name('operasional.urut');
+
+    // Logistik Armada (Pengeluaran Operasional) - Monitoring (Baca-Saja, input oleh bendahara)
+    Route::get('/logistik', [LogistikController::class, 'index'])->name('logistik.index');
 });
 
 // =========================================================================
-// AREA KHUSUS MANAJER / PIMPINAN
+// AREA KHUSUS OWNER / PEMILIK (PEMANTAUAN READ-ONLY)
 // =========================================================================
-Route::middleware(['auth', 'role:manajer,manager'])->prefix('manager')->name('manager.')->group(function () {
+Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
 
     // 1. Dashboard Utama
     Route::get('/dashboard', [ManagerDashboardController::class, 'index'])->name('dashboard');
@@ -145,7 +171,7 @@ Route::middleware(['auth', 'role:manajer,manager'])->prefix('manager')->name('ma
     // 3. Pusat Laporan Executif & Sub-Laporan
     Route::get('/laporan', [ManagerLaporanCtrl::class, 'index'])->name('laporan.index');
     Route::post('/laporan/cetak', [ManagerLaporanCtrl::class, 'cetak'])->name('laporan.cetak');
-    Route::get('/laporan/pelanggan', [ManagerLaporanController::class, 'pelanggan'])->name('laporan.pelanggan');
+    Route::get('/laporan/warga', [ManagerLaporanController::class, 'warga'])->name('laporan.warga');
     Route::get('/laporan/iuran', [ManagerLaporanController::class, 'iuran'])->name('laporan.iuran');
     Route::get('/laporan/volume', [ManagerLaporanController::class, 'volume'])->name('laporan.volume');
     Route::get('/laporan/keuangan', [ManagerLaporanController::class, 'keuangan'])->name('laporan.keuangan');
@@ -154,9 +180,10 @@ Route::middleware(['auth', 'role:manajer,manager'])->prefix('manager')->name('ma
     Route::get('/laporan/tunggakan', [ManagerLaporanController::class, 'tunggakan'])->name('laporan.tunggakan');
     Route::get('/laporan/petugas', [ManagerLaporanController::class, 'petugas'])->name('laporan.petugas');
     Route::get('/laporan/rekap-tahunan', [ManagerLaporanController::class, 'rekapTahunan'])->name('laporan.rekap-tahunan');
+    Route::get('/laporan/kendala', [ManagerLaporanController::class, 'kendala'])->name('laporan.kendala');
 
-    // 4. Monitoring Pelanggan
-    Route::get('/pelanggan', [ManagerPelangganController::class, 'index'])->name('pelanggan.index');
+    // 4. Monitoring Warga
+    Route::get('/warga', [ManagerWargaController::class, 'index'])->name('warga.index');
 
     // 5. Arus Kas & Gaji (Keuangan)
     Route::get('/keuangan', [ManagerKeuanganController::class, 'index'])->name('keuangan.index');
@@ -164,7 +191,6 @@ Route::middleware(['auth', 'role:manajer,manager'])->prefix('manager')->name('ma
     // 6. Kondisi Armada & Rute Operasional
     Route::get('/armada', [ManagerArmadaController::class, 'index'])->name('armada.index');
     Route::get('/rute', [ManagerRuteController::class, 'index'])->name('rute.index');
-    Route::post('/rute', [ManagerRuteController::class, 'store'])->name('rute.store');
     Route::get('/rute/{id}/peta', [ManagerRuteController::class, 'peta'])->name('rute.peta');
 
     // 7. Log Pengaduan
@@ -172,8 +198,6 @@ Route::middleware(['auth', 'role:manajer,manager'])->prefix('manager')->name('ma
 
     // 8. Iuran
     Route::get('/iuran', [ManagerController::class, 'iuran'])->name('iuran.index');
-    Route::post('/iuran/generate', [ManagerController::class, 'generateIuran'])->name('iuran.generate');
-    Route::post('/iuran/bayar/{id}', [ManagerController::class, 'bayarIuran'])->name('iuran.bayar');
 });
 
 // =========================================================================
@@ -212,65 +236,20 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->name('bendah
 });
 
 // =========================================================================
-// AREA KHUSUS PETUGAS ADMINISTRASI
-// =========================================================================
-Route::middleware(['auth', 'role:petugas_administrasi,administrasi'])->prefix('administrasi')->name('administrasi.')->group(function () {
-
-    // Dashboard
-    Route::get('/dashboard', [AdministrasiDashboardController::class, 'index'])->name('dashboard');
-
-    // ===== Modul 1: Master Data (Update Pelanggan, TPS, Armada) =====
-    Route::get('/master', [AdministrasiMasterController::class, 'index'])->name('master.index');
-    Route::get('/master/pelanggan/{id}/edit', [AdministrasiMasterController::class, 'editPelanggan'])->name('master.pelanggan.edit');
-    Route::put('/master/pelanggan/{id}', [AdministrasiMasterController::class, 'updatePelanggan'])->name('master.pelanggan.update');
-    Route::get('/master/tps/{id}/edit', [AdministrasiMasterController::class, 'editTps'])->name('master.tps.edit');
-    Route::put('/master/tps/{id}', [AdministrasiMasterController::class, 'updateTps'])->name('master.tps.update');
-    Route::get('/master/armada/{id}/edit', [AdministrasiMasterController::class, 'editArmada'])->name('master.armada.edit');
-    Route::put('/master/armada/{id}', [AdministrasiMasterController::class, 'updateArmada'])->name('master.armada.update');
-
-    // ===== Modul 2: Pelanggan (Pendaftaran Walk-in, Riwayat) =====
-    Route::get('/pelanggan', [AdministrasiPelangganController::class, 'index'])->name('pelanggan.index');
-    Route::get('/pelanggan/create', [AdministrasiPelangganController::class, 'create'])->name('pelanggan.create');
-    Route::post('/pelanggan', [AdministrasiPelangganController::class, 'store'])->name('pelanggan.store');
-    Route::get('/pelanggan/{id}', [AdministrasiPelangganController::class, 'show'])->name('pelanggan.show');
-
-    // ===== Modul 3 & 4: Operasional & Pengelolaan Sampah =====
-    Route::get('/operasional', [AdministrasiOperasionalController::class, 'index'])->name('operasional.index');
-    Route::get('/operasional/rekap-volume', [AdministrasiOperasionalController::class, 'rekapVolume'])->name('operasional.rekap-volume');
-    Route::get('/operasional/jadwal-rute', [AdministrasiOperasionalController::class, 'jadwalRute'])->name('operasional.jadwal-rute');
-    Route::post('/operasional/tugaskan', [AdministrasiOperasionalController::class, 'tugaskanPetugas'])->name('operasional.tugaskan');
-
-    // ===== Modul 7: Manajemen Operasional (Logistik Armada) =====
-    Route::get('/logistik', [AdministrasiLogistikController::class, 'index'])->name('logistik.index');
-    Route::get('/logistik/create', [AdministrasiLogistikController::class, 'create'])->name('logistik.create');
-    Route::post('/logistik', [AdministrasiLogistikController::class, 'store'])->name('logistik.store');
-
-    // ===== Modul 11: Pengaduan Masyarakat =====
-    Route::get('/pengaduan', [AdministrasiPengaduanController::class, 'index'])->name('pengaduan.index');
-    Route::get('/pengaduan/{id}', [AdministrasiPengaduanController::class, 'show'])->name('pengaduan.show');
-    Route::post('/pengaduan/{id}/verifikasi', [AdministrasiPengaduanController::class, 'verifikasi'])->name('pengaduan.verifikasi');
-    Route::post('/pengaduan/{id}/dispatch', [AdministrasiPengaduanController::class, 'dispatch'])->name('pengaduan.dispatch');
-});
-
-// =========================================================================
 // AREA KHUSUS PETUGAS LAPANGAN 
 // =========================================================================
-Route::middleware(['auth', 'role:petugas,petugas_lapangan,supir,pengangkut'])->prefix('petugas')->name('petugas.')->group(function () {
+Route::middleware(['auth', 'role:petugas,petugas_lapangan'])->prefix('petugas')->name('petugas.')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [PetugasLapanganDashboardController::class, 'index'])->name('dashboard');
 
     // ===== Modul 3: Rute, Jadwal & Monitoring Operasional =====
     Route::get('/rute', [PetugasLapanganRuteController::class, 'index'])->name('rute.index');
-    Route::get('/rute/{id}', [PetugasLapanganRuteController::class, 'show'])->name('rute.detail');
     Route::get('/rute/tugas-harian', [PetugasLapanganRuteController::class, 'tugasHarian'])->name('rute.tugas');
+    Route::get('/rute/{id}', [PetugasLapanganRuteController::class, 'show'])->name('rute.detail');
     Route::post('/rute/{id}/update-status', [PetugasLapanganRuteController::class, 'updateStatus'])->name('rute.update');
-    Route::post('/rute/{id}/upload-dokumentasi', [PetugasLapanganRuteController::class, 'uploadFoto'])->name('rute.upload');
 
-    // ===== Modul 4: Pengelolaan Sampah (Input Volume/Berat) =====
-    Route::get('/pengangkutan', [PetugasLapanganPengangkutanController::class, 'index'])->name('pengangkutan.index');
-    Route::get('/pengangkutan/create', [PetugasLapanganPengangkutanController::class, 'index'])->name('pengangkutan.create');
-    Route::post('/pengangkutan', [PetugasLapanganPengangkutanController::class, 'store'])->name('pengangkutan.store');
+    // ===== Modul 4: Pengelolaan Sampah (Hasil Pengangkutan per Titik) =====
     Route::post('/pengangkutan/{id}/upload-foto', [PetugasLapanganPengangkutanController::class, 'uploadFoto'])->name('pengangkutan.upload');
 
     // ===== Modul 11: Penugasan & Disposisi Pengaduan =====
@@ -292,29 +271,29 @@ Route::middleware(['auth', 'role:petugas,petugas_lapangan,supir,pengangkut'])->p
 });
 
 // =========================================================================
-// AREA KHUSUS PELANGGAN / MASYARAKAT
+// AREA KHUSUS WARGA / MASYARAKAT
 // =========================================================================
-Route::middleware(['auth', 'role:pelanggan,warga'])->prefix('pelanggan')->name('pelanggan.')->group(function () {
+Route::middleware(['auth', 'role:warga'])->prefix('warga')->name('warga.')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [PelangganDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('dashboard');
 
     // Modul 2: Profil & Riwayat Pengangkutan
-    Route::get('/profil', [PelangganProfileController::class, 'index'])->name('profile');
-    Route::get('/riwayat', [PelangganProfileController::class, 'riwayat'])->name('profile.riwayat');
+    Route::get('/profil', [WargaProfileController::class, 'index'])->name('profile');
+    Route::get('/riwayat', [WargaProfileController::class, 'riwayat'])->name('profile.riwayat');
 
     // Modul 5: Iuran & Pembayaran
-    Route::get('/iuran', [PelangganIuranController::class, 'index'])->name('iuran.index');
-    Route::post('/iuran/{id}/bayar', [PelangganIuranController::class, 'bayar'])->name('iuran.bayar');
-    Route::get('/iuran/{id}/kwitansi', [PelangganIuranController::class, 'kwitansi'])->name('iuran.kwitansi');
+    Route::get('/iuran', [WargaIuranController::class, 'index'])->name('iuran.index');
+    Route::post('/iuran/{id}/bayar', [WargaIuranController::class, 'bayar'])->name('iuran.bayar');
+    Route::get('/iuran/{id}/kwitansi', [WargaIuranController::class, 'kwitansi'])->name('iuran.kwitansi');
 
     // Modul 11: Pengaduan Masyarakat
-    Route::get('/pengaduan', [PelangganPengaduanController::class, 'index'])->name('pengaduan.index');
-    Route::get('/pengaduan/create', [PelangganPengaduanController::class, 'create'])->name('pengaduan.create');
-    Route::post('/pengaduan', [PelangganPengaduanController::class, 'store'])->name('pengaduan.store');
+    Route::get('/pengaduan', [WargaPengaduanController::class, 'index'])->name('pengaduan.index');
+    Route::get('/pengaduan/create', [WargaPengaduanController::class, 'create'])->name('pengaduan.create');
+    Route::post('/pengaduan', [WargaPengaduanController::class, 'store'])->name('pengaduan.store');
 
     // Modul 13: Notifikasi
-    Route::get('/notifikasi', [PelangganNotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi', [WargaNotifikasiController::class, 'index'])->name('notifikasi.index');
 });
 
 // =========================================================================
@@ -327,28 +306,24 @@ Route::get('/dashboard', function () {
     if ($userRole) {
         $roleName = strtolower(trim($userRole->name));
 
-        if (in_array($roleName, ['administrator', 'admin'])) {
+        if (in_array($roleName, ['administrator', 'admin', 'petugas_administrasi', 'administrasi'])) {
             return redirect()->route('admin.dashboard');
         }
 
-        if (in_array($roleName, ['manajer', 'manager'])) {
-            return redirect()->route('manager.dashboard');
+        if (in_array($roleName, ['owner'])) {
+            return redirect()->route('owner.dashboard');
         }
 
         if ($roleName === 'bendahara') {
             return redirect()->route('bendahara.dashboard');
         }
 
-        if (in_array($roleName, ['petugas_administrasi', 'administrasi'])) {
-            return redirect()->route('administrasi.dashboard');
-        }
-
-        if (in_array($roleName, ['petugas', 'petugas_lapangan', 'supir'])) {
+        if (in_array($roleName, ['petugas', 'petugas_lapangan'])) {
             return redirect()->route('petugas.dashboard');
         }
 
-        if (in_array($roleName, ['pelanggan', 'warga'])) {
-            return redirect()->route('pelanggan.dashboard');
+        if (in_array($roleName, ['warga'])) {
+            return redirect()->route('warga.dashboard');
         }
     }
 

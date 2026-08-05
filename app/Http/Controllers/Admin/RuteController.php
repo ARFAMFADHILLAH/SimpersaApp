@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rute;
-use App\Models\Pelanggan;
+use App\Models\Warga;
 use Illuminate\Http\Request;
 
 class RuteController extends Controller
 {
     public function index()
     {
-        $dataRute = Rute::withCount('pelanggan')->get();
+        $dataRute = Rute::withCount('warga')->get();
         return view('admin.rute.index', compact('dataRute'));
     }
 
@@ -33,13 +33,13 @@ class RuteController extends Controller
     {
         $rute = Rute::findOrFail($id);
 
-        // Ambil semua pelanggan yang terdaftar di rute ini yang memiliki data koordinat
-        $pelangganPeta = Pelanggan::with('user')
+        // Ambil semua warga yang terdaftar di rute ini yang memiliki data koordinat
+        $wargaPeta = Warga::with('user')
             ->where('rute_id', $id)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get();
 
-        return view('admin.rute.peta', compact('rute', 'pelangganPeta'));
+        return view('admin.rute.peta', compact('rute', 'wargaPeta'));
     }
 }
