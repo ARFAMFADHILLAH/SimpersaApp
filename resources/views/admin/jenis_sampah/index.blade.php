@@ -33,8 +33,9 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <x-input-label for="tarif_per_kg" value="Tarif per Kilogram (Rp) *" />
+                            <x-input-label for="tarif_per_kg" value="Harga Beli Mitra per Kg (Rp) *" />
                             <x-text-input id="tarif_per_kg" name="tarif_per_kg" type="number" step="0.01" class="mt-1 block w-full" value="{{ old('tarif_per_kg', 0) }}" required />
+                            <p class="mt-1 text-xs text-gray-400">Dipakai sebagai harga bayar tunai setoran bank sampah ke warga.</p>
                         </div>
                         <div>
                             <x-input-label for="tarif_bulanan_flat" value="Tarif Iuran Tetap Bulanan (Rp) *" />
@@ -56,7 +57,7 @@
                             <tr class="border-b bg-gray-50">
                                 <th class="p-3 text-sm font-semibold text-gray-600">No</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600">Jenis Sampah</th>
-                                <th class="p-3 text-sm font-semibold text-gray-600">Tarif / Kg</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600">Harga Beli / Kg</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600">Tarif Bulanan Flat</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600 text-center">Aksi</th>
                             </tr>
@@ -124,7 +125,7 @@
                     </div>
 
                     <div>
-                        <x-input-label for="edit_tarif_per_kg" value="Tarif per Kilogram (Rp) *" />
+                        <x-input-label for="edit_tarif_per_kg" value="Harga Beli Mitra per Kg (Rp) *" />
                         <x-text-input id="edit_tarif_per_kg" name="tarif_per_kg" type="number" step="0.01" class="mt-1 block w-full" x-model="editData.tarif_per_kg" required />
                     </div>
 

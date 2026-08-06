@@ -5,11 +5,13 @@ namespace Tests\Feature;
 use App\Models\Armada;
 use App\Models\Iuran;
 use App\Models\JenisSampah;
+use App\Models\Mitra;
 use App\Models\Pengaduan;
 use App\Models\PengaturanGaji;
 use App\Models\PengaturanIuran;
 use App\Models\Penggajian;
 use App\Models\Rute;
+use App\Models\SetoranSampah;
 use App\Models\Tps;
 use App\Models\User;
 use App\Models\Warga;
@@ -102,7 +104,13 @@ class AllRolesPostTest extends TestCase
             'status_pembayaran' => 'Pending',
         ]);
 
-        return compact('admin', 'owner', 'bendahara', 'petugas', 'wargaUser', 'wilayah', 'rute', 'warga', 'armada', 'jenisSampah', 'tps', 'iuran', 'pengaduan', 'penggajian');
+        $mitra = Mitra::create([
+            'nama_mitra' => 'Mitra Utama Bank Sampah',
+            'no_hp' => '081234567890',
+            'alamat_kontak' => 'Jl. Uji No. 2',
+        ]);
+
+        return compact('admin', 'owner', 'bendahara', 'petugas', 'wargaUser', 'wilayah', 'rute', 'warga', 'armada', 'jenisSampah', 'tps', 'iuran', 'pengaduan', 'penggajian', 'mitra');
     }
 
     public function test_admin_crud_master_data(): void
@@ -126,11 +134,6 @@ class AllRolesPostTest extends TestCase
         ])->assertRedirect();
         $this->assertDatabaseHas('wilayah_pelayanan', ['nama_wilayah' => 'Wilayah Timur']);
 
-        $this->actingAs($admin)->post(route('admin.tps.store'), [
-            'nama_tps' => 'TPS Baru', 'lokasi_koordinat' => '-6.1,106.7', 'kapasitas_maksimal_m3' => '80',
-        ])->assertRedirect();
-        $this->assertDatabaseHas('tps', ['nama_tps' => 'TPS Baru']);
-
         $this->actingAs($admin)->post(route('admin.rute.store'), [
             'nama_rute' => 'Rute C', 'hari_angkut' => 'Rabu', 'keterangan' => 'Perumahan Baru',
         ])->assertRedirect();
@@ -142,6 +145,46 @@ class AllRolesPostTest extends TestCase
             'role_id' => $this->roles['petugas_lapangan'], 'status' => 'aktif',
         ])->assertRedirect();
         $this->assertDatabaseHas('users', ['email' => 'baru@sistemsampah.com']);
+    }
+
+    public function test_admin_mencatat_setoran_warga_dibayar_mitra(): void
+    {
+        $d = $this->buatDataDasar();
+        $admin = $d['admin'];
+        $mitra = $d['mitra'];
+
+        // Profil mitra tunggal bisa diperbarui admin
+        $this->actingAs($admin)->put(route('admin.mitra.update'), [
+            'nama_mitra' => 'KISUCI',
+            'no_hp' => '081234567890',
+            'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('mitras', ['id' => $mitra->id, 'nama_mitra' => 'KISUCI']);
+
+        // Catat setoran 3 kg dengan tarif 2000/kg => total 6000, dibayar tunai otomatis oleh profil mitra
+        $this->actingAs($admin)->post(route('admin.bank-sampah.store'), [
+            'warga_id' => $d['warga']->id,
+            'jenis_sampah_id' => $d['jenisSampah']->id,
+            'berat_kg' => 3,
+            'tanggal_setoran' => now()->toDateString(),
+            'keterangan' => 'Setoran rutin mingguan',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('setoran_sampahs', [
+            'warga_id' => $d['warga']->id,
+            'mitra_id' => $mitra->id,
+            'jenis_sampah_id' => $d['jenisSampah']->id,
+            'berat_kg' => 3,
+            'harga_per_kg' => 2000,
+            'total_bayar' => 6000,
+        ]);
+
+        // Warga penyetor bisa melihat riwayat setorannya sendiri
+        $this->actingAs($d['wargaUser'])
+            ->get(route('warga.bank-sampah.index'))
+            ->assertOk()
+            ->assertSee('KISUCI')
+            ->assertSee('6.000');
     }
 
     public function test_admin_mendaftarkan_warga_dengan_alamat_lengkap(): void

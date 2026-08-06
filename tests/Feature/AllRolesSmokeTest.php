@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Models\Armada;
 use App\Models\Iuran;
 use App\Models\JenisSampah;
+use App\Models\Mitra;
 use App\Models\Pengaduan;
 use App\Models\Pengangkutan;
 use App\Models\Penggajian;
 use App\Models\Rute;
+use App\Models\SetoranSampah;
 use App\Models\Tps;
 use App\Models\User;
 use App\Models\Warga;
@@ -140,6 +142,22 @@ class AllRolesSmokeTest extends TestCase
             'status_pembayaran' => 'Pending',
         ]);
 
+        $mitra = Mitra::create([
+            'nama_mitra' => 'Mitra Bank Sampah Bersih',
+            'no_hp' => '081234567890',
+            'alamat_kontak' => 'Jl. Uji No. 2',
+        ]);
+
+        $setoran = SetoranSampah::create([
+            'warga_id' => $warga->id,
+            'mitra_id' => $mitra->id,
+            'jenis_sampah_id' => $jenisSampah->id,
+            'berat_kg' => 2.5,
+            'harga_per_kg' => 2000,
+            'total_bayar' => 5000,
+            'tanggal_setoran' => today()->toDateString(),
+        ]);
+
         DB::table('pengeluaran_operasional')->insert([
             'armada_id' => $armada->id,
             'tanggal_pengeluaran' => today()->toDateString(),
@@ -173,7 +191,8 @@ class AllRolesSmokeTest extends TestCase
         return compact(
             'admin', 'owner', 'bendahara', 'petugas', 'wargaUser',
             'wilayah', 'ruteA', 'ruteB', 'warga', 'armada', 'jenisSampah', 'tps',
-            'pengangkutan', 'pengaduan', 'iuran', 'iuranLunas', 'penggajian'
+            'pengangkutan', 'pengaduan', 'iuran', 'iuranLunas', 'penggajian',
+            'mitra', 'setoran'
         );
     }
 
@@ -199,7 +218,8 @@ class AllRolesSmokeTest extends TestCase
             route('admin.armada.show', $d['armada']->id),
             route('admin.armada.edit', $d['armada']->id),
             route('admin.jenis-sampah.index'),
-            route('admin.tps.index'),
+            route('admin.bank-sampah.index'),
+            route('admin.mitra.index'),
             route('admin.iuran.index'),
             route('admin.gaji.index'),
             route('admin.operasional.index'),
@@ -215,7 +235,6 @@ class AllRolesSmokeTest extends TestCase
             route('admin.master.index'),
             route('admin.master.warga.edit', $d['warga']->id),
             route('admin.master.armada.edit', $d['armada']->id),
-            route('admin.master.tps.edit', $d['tps']->id),
             route('admin.logistik.index'),
         ];
 
@@ -315,6 +334,7 @@ class AllRolesSmokeTest extends TestCase
             route('warga.iuran.kwitansi', $d['iuranLunas']->id),
             route('warga.pengaduan.index'),
             route('warga.pengaduan.create'),
+            route('warga.bank-sampah.index'),
             route('notifikasi.index'),
         ];
 

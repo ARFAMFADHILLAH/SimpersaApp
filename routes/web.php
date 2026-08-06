@@ -5,7 +5,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotifikasiController;
 
 // Controller Admin
-use App\Http\Controllers\Admin\TPSController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\WargaController;
 use App\Http\Controllers\Admin\JenisSampahController;
@@ -21,6 +20,8 @@ use App\Http\Controllers\Admin\WilayahPelayananController;
 use App\Http\Controllers\Admin\RuteController;
 use App\Http\Controllers\Admin\PengangkutanController;
 use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Admin\BankSampahController;
+use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\OperasionalController;
 use App\Http\Controllers\Admin\LogistikController;
 use App\Http\Controllers\Admin\GajiController;
@@ -52,6 +53,7 @@ use App\Http\Controllers\Warga\ProfileController as WargaProfileController;
 use App\Http\Controllers\Warga\IuranController as WargaIuranController;
 use App\Http\Controllers\Warga\PengaduanController as WargaPengaduanController;
 use App\Http\Controllers\Warga\NotifikasiController as WargaNotifikasiController;
+use App\Http\Controllers\Warga\SetoranController as WargaSetoranController;
 
 // Controller Bendahara
 use App\Http\Controllers\Bendahara\DashboardController as BendaharaDashboardController;
@@ -93,8 +95,14 @@ Route::middleware(['auth', 'role:admin,administrator,administrasi'])->prefix('ad
     Route::resource('/warga', WargaController::class)->names('warga');
     Route::resource('/armada', ArmadaController::class)->names('armada');
     Route::resource('/wilayah-pelayanan', WilayahPelayananController::class)->except(['create', 'show'])->names('wilayah');
-    Route::resource('/tps', TPSController::class)->except(['create', 'edit', 'show'])->names('tps');
     Route::resource('/users', UserController::class)->except('show')->names('users');
+
+    // Bank Sampah: Mitra (data saja, tanpa login) & Setoran Warga
+    Route::get('/bank-sampah', [BankSampahController::class, 'index'])->name('bank-sampah.index');
+    Route::post('/bank-sampah', [BankSampahController::class, 'store'])->name('bank-sampah.store');
+    Route::delete('/bank-sampah/{id}', [BankSampahController::class, 'destroy'])->name('bank-sampah.destroy');
+    Route::get('/mitra', [MitraController::class, 'index'])->name('mitra.index');
+    Route::put('/mitra', [MitraController::class, 'update'])->name('mitra.update');
 
     // Parameter & Rule Configurations
     Route::get('/iuran/pengaturan', [IuranController::class, 'index'])->name('iuran.index');
@@ -137,12 +145,10 @@ Route::middleware(['auth', 'role:admin,administrator,administrasi'])->prefix('ad
     Route::post('/pengaduan/{id}/verifikasi', [AdminPengaduanController::class, 'verifikasi'])->name('pengaduan.verifikasi');
     Route::post('/pengaduan/{id}/dispatch', [AdminPengaduanController::class, 'dispatch'])->name('pengaduan.dispatch');
 
-    // Master Data (Edit Warga, TPS, Armada) - dari Panel Administrasi
+    // Master Data (Edit Warga, Armada) - dari Panel Administrasi
     Route::get('/master', [MasterController::class, 'index'])->name('master.index');
     Route::get('/master/warga/{id}/edit', [MasterController::class, 'editWarga'])->name('master.warga.edit');
     Route::put('/master/warga/{id}', [MasterController::class, 'updateWarga'])->name('master.warga.update');
-    Route::get('/master/tps/{id}/edit', [MasterController::class, 'editTps'])->name('master.tps.edit');
-    Route::put('/master/tps/{id}', [MasterController::class, 'updateTps'])->name('master.tps.update');
     Route::get('/master/armada/{id}/edit', [MasterController::class, 'editArmada'])->name('master.armada.edit');
     Route::put('/master/armada/{id}', [MasterController::class, 'updateArmada'])->name('master.armada.update');
 
@@ -291,6 +297,9 @@ Route::middleware(['auth', 'role:warga'])->prefix('warga')->name('warga.')->grou
     Route::get('/pengaduan', [WargaPengaduanController::class, 'index'])->name('pengaduan.index');
     Route::get('/pengaduan/create', [WargaPengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [WargaPengaduanController::class, 'store'])->name('pengaduan.store');
+
+    // Bank Sampah: Riwayat Setoran Warga (dibayar tunai oleh mitra)
+    Route::get('/bank-sampah', [WargaSetoranController::class, 'index'])->name('bank-sampah.index');
 
     // Modul 13: Notifikasi
     Route::get('/notifikasi', [WargaNotifikasiController::class, 'index'])->name('notifikasi.index');

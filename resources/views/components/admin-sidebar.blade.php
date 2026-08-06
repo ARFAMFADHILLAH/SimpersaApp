@@ -33,6 +33,20 @@
             </div>
 
             <div class="px-4">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2 px-2">Bank Sampah</p>
+                <div class="space-y-1">
+                    <a href="{{ route('admin.bank-sampah.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('admin.bank-sampah.*') ? 'bg-green-600 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800' }} text-sm transition">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h2M7 6h2M7 19h2M6 10V3m8 13V3m8 0V3" /></svg>
+                        Setoran Sampah
+                    </a>
+                    <a href="{{ route('admin.mitra.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('admin.mitra.*') ? 'bg-green-600 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800' }} text-sm transition">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        Profil Mitra
+                    </a>
+                </div>
+            </div>
+
+            <div class="px-4">
                 <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2 px-2">Menu Lainnya</p>
                 <div class="space-y-1">
                     <a href="{{ route('admin.rute.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('admin.rute.*') ? 'bg-green-600 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800' }} text-sm transition">

@@ -41,32 +41,6 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Data TPS</h3>
-                    <div class="bg-white shadow rounded-lg overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kapasitas</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($tpsList as $t)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm">{{ $t->nama_tps }}</td>
-                                        <td class="px-4 py-3 text-sm">{{ $t->kapasitas_maksimal_m3 }} m&sup3;</td>
-                                        <td class="px-4 py-3">
-                                            <a href="{{ route('admin.master.tps.edit', $t->id) }}" class="text-cyan-600 hover:underline text-sm">Edit</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Data Armada</h3>
                     <div class="bg-white shadow rounded-lg overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">

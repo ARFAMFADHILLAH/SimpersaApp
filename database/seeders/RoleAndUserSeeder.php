@@ -149,5 +149,23 @@ class RoleAndUserSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
+        // 11. Profil Mitra (Bank Sampah) - pemilik tunggal, tanpa login
+        if (!DB::table('mitras')->exists()) {
+            DB::table('mitras')->insert([
+                'nama_mitra' => 'KISUCI',
+                'no_hp' => '081234567890',
+                'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            DB::table('mitras')->where('id', DB::table('mitras')->orderBy('id')->value('id'))
+                ->update([
+                    'nama_mitra' => 'KISUCI',
+                    'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
+                    'updated_at' => now(),
+                ]);
+        }
     }
 }
