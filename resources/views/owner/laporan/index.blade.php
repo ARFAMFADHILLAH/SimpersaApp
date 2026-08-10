@@ -1,82 +1,73 @@
 <x-app-layout>
-
     <div class="flex flex-col md:flex-row min-h-screen bg-gray-100 pb-24 md:pb-0">
         <x-owner-sidebar />
-
-        <!-- Main Content Wrapper -->
-
-        <!-- Main Content Wrapper -->
-        <main class="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+        <main class="flex-1 py-10 px-4 sm:px-6 lg:px-8">
             <div class="max-w-7xl mx-auto space-y-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-gray-900">Pusat Laporan Eksekutif</h2>
-                    <div class="flex gap-2">
-                        <a href="{{ route('owner.laporan.tunggakan') }}" class="px-3 py-1.5 bg-red-50 text-red-700 text-sm font-semibold rounded-md hover:bg-red-100">Tunggakan</a>
-                        <a href="{{ route('owner.laporan.petugas') }}" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-md hover:bg-indigo-100">Petugas</a>
-                        <a href="{{ route('owner.laporan.rekap-tahunan') }}" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-md hover:bg-emerald-100">Rekap Tahunan</a>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Ringkasan Bisnis — POS Bank Sampah</h1>
+                        <p class="text-sm text-gray-500 mt-1">Rekapitulasi keuangan tahun {{ $tahun }} (semua angka read-only untuk pemantauan).</p>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @php
-                        $quickLinks = [
-                            ['route' => 'owner.laporan.warga', 'label' => 'Laporan Warga', 'desc' => 'Status & kewargaan'],
-                            ['route' => 'owner.laporan.iuran', 'label' => 'Laporan Iuran', 'desc' => 'Penerimaan iuran'],
-                            ['route' => 'owner.laporan.volume', 'label' => 'Laporan Volume', 'desc' => 'Rekap volume sampah & TPA'],
-                            ['route' => 'owner.laporan.keuangan', 'label' => 'Laporan Keuangan', 'desc' => 'Laba rugi & kas'],
-                            ['route' => 'owner.laporan.gaji', 'label' => 'Laporan Gaji', 'desc' => 'Rekap payroll petugas'],
-                            ['route' => 'owner.laporan.armada', 'label' => 'Laporan Armada', 'desc' => 'Servis & biaya BBM'],
-                            ['route' => 'owner.laporan.tunggakan', 'label' => 'Laporan Tunggakan', 'desc' => 'Monitoring tunggakan iuran'],
-                            ['route' => 'owner.laporan.petugas', 'label' => 'Laporan Petugas', 'desc' => 'Kinerja & beban kerja'],
-                            ['route' => 'owner.laporan.kendala', 'label' => 'Laporan Kendala Petugas', 'desc' => 'Kendala di lapangan'],
-                            ['route' => 'owner.laporan.rekap-tahunan', 'label' => 'Rekap Tahunan', 'desc' => 'Agregasi bulanan per tahun'],
-                        ];
-                    @endphp
-                    @foreach($quickLinks as $link)
-                        <a href="{{ route($link['route']) }}" class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow transition">
-                            <span class="block text-sm font-bold text-gray-900">{{ $link['label'] }}</span>
-                            <span class="text-xs text-gray-500">{{ $link['desc'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-
-                <div class="max-w-md mx-auto">
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Pilih Periode Laporan</h3>
-                            <p class="text-xs text-gray-500">Tentukan rentang tanggal untuk mencetak dokumen executive</p>
-                        </div>
-                    </div>
-
-                    <form action="{{ route('owner.laporan.cetak') }}" method="POST" target="_blank">
-                        @csrf
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
-                                <input type="date" name="tanggal_mulai" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Tanggal Selesai</label>
-                                <input type="date" name="tanggal_selesai" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
-                            </div>
-
-                            <div class="pt-2">
-                                <x-primary-button class="w-full justify-center bg-indigo-600 hover:bg-indigo-700 py-2.5">
-                                    {{ __('Buka & Cetak Dokumen') }}
-                                </x-primary-button>
-                            </div>
-                        </div>
+                    <form action="{{ route('owner.laporan.index') }}" method="GET" class="flex gap-2">
+                        <input type="number" name="tahun" value="{{ $tahun }}" min="2000" max="2100" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
+                        <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Tampilkan</button>
                     </form>
                 </div>
+
+                <!-- KARTU TAHUNAN -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-green-500">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pemasukan (Penjualan ke Pengepul)</p>
+                        <p class="text-2xl font-bold text-green-600 mt-1">Rp {{ number_format($masuk, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-red-500">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pengeluaran</p>
+                        <p class="text-2xl font-bold text-red-600 mt-1">Rp {{ number_format($totalKeluar, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-400 mt-1">belanja Rp {{ number_format($keluarBeli, 0, ',', '.') }} + tarik Rp {{ number_format($keluarTarik, 0, ',', '.') }} + gaji Rp {{ number_format($keluarGaji, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-5">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Volume Sampah</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalKgBeli, 2, ',', '.') }} kg</p>
+                        <p class="text-xs text-gray-400 mt-1">beli · jual {{ number_format($totalKgJual, 2, ',', '.') }} kg</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-5">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nasabah & Saldo</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalNasabah, 0, ',', '.') }} warga</p>
+                        <p class="text-xs text-gray-400 mt-1">saldo Rp {{ number_format($totalSaldoTabungan, 0, ',', '.') }}</p>
+                    </div>
                 </div>
 
+                <!-- GRAFIK TABLE 12 BULAN -->
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Kas per Bulan — {{ $tahun }}</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-xs text-gray-500 border-b">
+                                    <th class="py-2">Bulan</th>
+                                    <th class="py-2 text-right">Masuk (Rp)</th>
+                                    <th class="py-2 text-right">Keluar (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($labels as $i => $label)
+                                    <tr class="border-b">
+                                        <td class="py-2 font-medium">{{ $label }}</td>
+                                        <td class="py-2 text-right text-green-600">{{ number_format($grafikMasuk[$i], 0, ',', '.') }}</td>
+                                        <td class="py-2 text-right text-red-500">{{ number_format($grafikKeluar[$i], 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                        <a href="{{ route('owner.laporan.kas') }}" class="text-green-600 hover:text-green-800 font-semibold">Detail Arus Kas &raquo;</a>
+                        <a href="{{ route('owner.laporan.pembelian') }}" class="text-green-600 hover:text-green-800 font-semibold">Laporan Pembelian &raquo;</a>
+                        <a href="{{ route('owner.laporan.penjualan') }}" class="text-green-600 hover:text-green-800 font-semibold">Laporan Penjualan &raquo;</a>
+                        <a href="{{ route('owner.laporan.gaji') }}" class="text-green-600 hover:text-green-800 font-semibold">Penggajian &raquo;</a>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

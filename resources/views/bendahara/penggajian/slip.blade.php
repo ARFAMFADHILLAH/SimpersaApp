@@ -33,12 +33,11 @@
     <table class="detail">
         <tr><th colspan="2" style="text-align:center; background:#f0f0f0;">Rincian Gaji</th></tr>
         <tr><td>Gaji Pokok</td><td style="text-align:right">Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td></tr>
-        <tr><td>Insentif & Bonus</td><td style="text-align:right">Rp {{ number_format($gaji->insentif_lembur, 0, ',', '.') }}</td></tr>
-        <tr><td>Potongan</td><td style="text-align:right; color:red;">(Rp {{ number_format($gaji->potongan, 0, ',', '.') }})</td></tr>
+        <tr><td>Bonus / Insentif</td><td style="text-align:right">Rp {{ number_format($gaji->insentif_lembur, 0, ',', '.') }}</td></tr>
     </table>
 
     <div class="total">
-        TOTAL GAJI BERSIH: Rp {{ number_format($gaji->total_gaji_bersih, 0, ',', '.') }}
+        TOTAL PENERIMAAN: Rp {{ number_format($gaji->total_gaji_bersih, 0, ',', '.') }}
     </div>
 
     <div style="margin-top:20px;">

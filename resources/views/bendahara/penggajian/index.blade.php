@@ -18,17 +18,14 @@
                 @endif
 
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Proses Penggajian Otomatis</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Proses Penggajian</h3>
                     <p class="text-sm text-gray-500 mb-2">
-                        Sistem menghitung gaji berdasarkan absensi dengan parameter berikut
-                        (diatur oleh admin di <span class="font-semibold text-gray-700">Pengaturan Gaji</span>):
+                        Gaji dihitung dari <span class="font-semibold text-gray-700">Gaji Pokok</span> ditambah
+                        <span class="font-semibold text-gray-700">Bonus / Insentif</span> yang diinput Bendahara saat pembayaran.
                     </p>
                     <p class="text-sm text-gray-700 mb-4">
-                        Gaji Pokok <span class="font-semibold">Rp {{ number_format($pengaturan->gaji_pokok, 0, ',', '.') }}</span>
-                        + Insentif <span class="font-semibold">Rp {{ number_format($pengaturan->insentif_per_hadir, 0, ',', '.') }}/hadir</span>
-                        + Bonus <span class="font-semibold">Rp {{ number_format($pengaturan->bonus_amount, 0, ',', '.') }}</span> (jika hadir &ge; {{ $pengaturan->minimal_hadir_bonus }} hari)
-                        - Potongan Alpha <span class="font-semibold">Rp {{ number_format($pengaturan->potongan_alpha_per_hari, 0, ',', '.') }}/hari</span>
-                        - Potongan Izin <span class="font-semibold">Rp {{ number_format($pengaturan->potongan_izin_per_hari, 0, ',', '.') }}/hari</span>.
+                        Gaji Pokok saat ini: <span class="font-semibold">Rp {{ number_format($pengaturan->gaji_pokok, 0, ',', '.') }}</span>
+                        <span class="text-gray-400">(diatur admin di Pengaturan Gaji)</span>
                     </p>
                     <form action="{{ route('bendahara.penggajian.proses') }}" method="POST" class="flex items-end gap-4">
                         @csrf
@@ -68,9 +65,8 @@
                                     <th class="p-3 text-sm font-semibold text-gray-600">Nama Petugas</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Bulan</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Gaji Pokok</th>
-                                    <th class="p-3 text-sm font-semibold text-gray-600">Insentif</th>
-                                    <th class="p-3 text-sm font-semibold text-gray-600">Potongan</th>
-                                    <th class="p-3 text-sm font-semibold text-gray-600 bg-indigo-50 text-indigo-700">Bersih</th>
+                                    <th class="p-3 text-sm font-semibold text-gray-600">Bonus / Insentif</th>
+                                    <th class="p-3 text-sm font-semibold text-gray-600 bg-indigo-50 text-indigo-700">Total Penerimaan</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Status</th>
                                     <th class="p-3 text-sm font-semibold text-gray-600">Aksi</th>
                                 </tr>
@@ -83,7 +79,6 @@
                                         <td class="p-3 text-sm text-gray-700">{{ $gaji->bulan_gaji }}</td>
                                         <td class="p-3 text-sm text-gray-700">Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td>
                                         <td class="p-3 text-sm text-green-700">Rp {{ number_format($gaji->insentif_lembur, 0, ',', '.') }}</td>
-                                        <td class="p-3 text-sm text-red-600">Rp {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
                                         <td class="p-3 text-sm font-bold bg-indigo-50 text-indigo-700">Rp {{ number_format($gaji->total_gaji_bersih, 0, ',', '.') }}</td>
                                         <td class="p-3 text-sm">
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $gaji->status_pembayaran == 'Dibayar' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
@@ -93,9 +88,15 @@
                                         <td class="p-3 text-sm">
                                             <div class="flex gap-1">
                                                 @if($gaji->status_pembayaran == 'Pending')
-                                                    <form action="{{ route('bendahara.penggajian.bayar', $gaji->id) }}" method="POST" onsubmit="return confirm('Bayar gaji ini?')">
+                                                    <form action="{{ route('bendahara.penggajian.bayar', $gaji->id) }}" method="POST" onsubmit="return confirm('Bayar gaji ini?')" class="flex flex-col gap-1 items-start border border-green-200 bg-green-50 rounded-lg p-2 w-36">
                                                         @csrf
-                                                        <button type="submit" class="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Bayar</button>
+                                                        <label for="bonus-{{ $gaji->id }}" class="text-[10px] font-semibold text-gray-600">Bonus / Insentif (Rp)</label>
+                                                        <input type="number" name="insentif_lembur" id="bonus-{{ $gaji->id }}" min="0" value="0"
+                                                               class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
+                                                               placeholder="cth: 500000" />
+                                                        <button type="submit" class="w-full text-xs bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1.5 rounded-md">
+                                                            Bayar Gaji
+                                                        </button>
                                                     </form>
                                                 @endif
                                                 <a href="{{ route('bendahara.penggajian.slip', $gaji->id) }}" target="_blank"
@@ -107,7 +108,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="p-4 text-center text-sm text-gray-500">
+                                        <td colspan="8" class="p-4 text-center text-sm text-gray-500">
                                             Belum ada data penggajian untuk bulan ini. Proses gaji untuk memulai.
                                         </td>
                                     </tr>

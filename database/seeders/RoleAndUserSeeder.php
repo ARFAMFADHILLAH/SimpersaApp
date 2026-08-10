@@ -99,7 +99,7 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 7. Akun Warga
+        // 7. Akun Warga (Nasabah Bank Sampah - TANPA LOGIN, hanya data konter)
         $wargaUserId = null;
         DB::table('users')->updateOrInsert(
             ['email' => 'warga@sistemsampah.com'],
@@ -166,6 +166,44 @@ class RoleAndUserSeeder extends Seeder
                     'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
                     'updated_at' => now(),
                 ]);
+        }
+
+        // 12. Seed Data Kategori Sampah (POS Bank Sampah)
+        if (!DB::table('kategori_sampah')->exists()) {
+            DB::table('kategori_sampah')->insert([
+                ['nama_kategori' => 'Organik', 'keterangan' => 'Sampah sisa organik rumah tangga', 'created_at' => now(), 'updated_at' => now()],
+                ['nama_kategori' => 'Non-Organik', 'keterangan' => 'Sampah anorganik bernilai jual', 'created_at' => now(), 'updated_at' => now()],
+                ['nama_kategori' => 'Bahan Berbahaya & Beracun (B3)', 'keterangan' => 'Sampah B3 rumah tangga', 'created_at' => now(), 'updated_at' => now()],
+            ]);
+        }
+
+        // 13. Seed Data Jenis Sampah & Tarif (Harga Beli = bayar ke warga, Harga Jual = jual ke pengepul)
+        if (!DB::table('jenis_sampah_dan_tarif')->exists()) {
+            $kategoriIds = DB::table('kategori_sampah')->pluck('id', 'nama_kategori');
+            DB::table('jenis_sampah_dan_tarif')->insert([
+                ['kategori_sampah_id' => $kategoriIds['Organik'] ?? null, 'nama_jenis' => 'Sisa Makanan', 'tarif_per_kg' => 1500, 'tarif_jual_per_kg' => 2000, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Organik'] ?? null, 'nama_jenis' => 'Daun Kering', 'tarif_per_kg' => 500, 'tarif_jual_per_kg' => 800, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Non-Organik'] ?? null, 'nama_jenis' => 'Plastik Botol PET', 'tarif_per_kg' => 2000, 'tarif_jual_per_kg' => 3000, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Non-Organik'] ?? null, 'nama_jenis' => 'Plastik Kemasan', 'tarif_per_kg' => 1200, 'tarif_jual_per_kg' => 1800, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Non-Organik'] ?? null, 'nama_jenis' => 'Kertas & Kardus', 'tarif_per_kg' => 2500, 'tarif_jual_per_kg' => 3500, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Non-Organik'] ?? null, 'nama_jenis' => 'Logam & Kaleng', 'tarif_per_kg' => 4000, 'tarif_jual_per_kg' => 5000, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Non-Organik'] ?? null, 'nama_jenis' => 'Kaca & Botol Bekas', 'tarif_per_kg' => 1000, 'tarif_jual_per_kg' => 1500, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['kategori_sampah_id' => $kategoriIds['Bahan Berbahaya & Beracun (B3)'] ?? null, 'nama_jenis' => 'Baterai & Elektronik', 'tarif_per_kg' => 3000, 'tarif_jual_per_kg' => 4500, 'tarif_bulanan_flat' => 0, 'created_at' => now(), 'updated_at' => now()],
+            ]);
+        }
+
+        // 14. Seed Data Pengaturan Gaji (Standar Gaji Pokok Petugas)
+        if (!DB::table('pengaturan_gaji')->exists()) {
+            DB::table('pengaturan_gaji')->insert([
+                'gaji_pokok' => 2000000,
+                'insentif_per_hadir' => 50000,
+                'bonus_amount' => 500000,
+                'minimal_hadir_bonus' => 15,
+                'potongan_alpha_per_hari' => 75000,
+                'potongan_izin_per_hari' => 30000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }

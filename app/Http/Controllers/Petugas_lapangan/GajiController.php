@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Petugas_lapangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\AbsensiPetugas;
 use App\Models\Penggajian;
-use Illuminate\Http\Request;
 
 class GajiController extends Controller
 {
@@ -13,16 +11,23 @@ class GajiController extends Controller
     {
         $userId = auth()->id();
 
-        $riwayatAbsensi = AbsensiPetugas::where('user_id', $userId)
-            ->orderBy('tanggal', 'desc')
-            ->take(30)
-            ->get();
-
         $riwayatGaji = Penggajian::with('petugas')
             ->where('petugas_id', $userId)
             ->orderBy('bulan_gaji', 'desc')
             ->get();
 
-        return view('petugas_lapangan.gaji.index', compact('riwayatAbsensi', 'riwayatGaji'));
+        return view('petugas_lapangan.gaji.index', compact('riwayatGaji'));
+    }
+
+    /**
+     * Tampilkan slip gaji milik petugas yang sedang login.
+     */
+    public function slip($id)
+    {
+        $gaji = Penggajian::with('petugas')
+            ->where('petugas_id', auth()->id())
+            ->findOrFail($id);
+
+        return view('petugas_lapangan.gaji.slip', compact('gaji'));
     }
 }

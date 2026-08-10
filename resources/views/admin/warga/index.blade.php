@@ -36,36 +36,8 @@
                             <x-input-error :messages="$errors->get('no_hp')" class="mt-1" />
                         </div>
 
-                    
                         <div>
-                            <x-input-label for="wilayah_pelayanan_id" value="Wilayah Pelayanan *" />
-                            <select id="wilayah_pelayanan_id" name="wilayah_pelayanan_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
-                                <option value="">-- Pilih Wilayah Pelayanan --</option>
-                                @foreach($wilayahs as $wil)
-                                    <option value="{{ $wil->id }}" {{ old('wilayah_pelayanan_id') == $wil->id ? 'selected' : '' }}>
-                                        {{ $wil->nama_wilayah }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('wilayah_pelayanan_id')" class="mt-1" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="rute_id" value="Rute *" />
-                            <select id="rute_id" name="rute_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
-                                <option value="">-- Pilih Rute --</option>
-                                @foreach(\App\Models\Rute::all() as $rute)
-                                    <option value="{{ $rute->id }}" {{ old('rute_id') == $rute->id ? 'selected' : '' }}>
-                                        {{ $rute->nama_rute }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('rute_id')" class="mt-1" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <x-input-label for="alamat_lengkap" value="Alamat Lengkap Rumah *" />
+                            <x-input-label for="alamat_lengkap" value="Alamat Lengkap Rumah *" />
                         <textarea id="alamat_lengkap" name="alamat_lengkap" rows="2" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required placeholder="Jl. Mawar No. 12, RT 01/02">{{ old('alamat_lengkap') }}</textarea>
                         <x-input-error :messages="$errors->get('alamat_lengkap')" class="mt-1" />
                     </div>
@@ -94,7 +66,6 @@
                                 <th class="p-3">No Warga</th>
                                 <th class="p-3">Nama</th>
                                 <th class="p-3">Kontak / Email</th>
-                                <th class="p-3">Wilayah</th>
                                 <th class="p-3">Alamat</th>
                                 <th class="p-3">Koordinat GPS</th>
                                 <th class="p-3">Status</th>
@@ -109,13 +80,6 @@
                                     <td class="p-3 text-xs">
                                         <div class="font-medium text-gray-900">{{ $plg->no_hp }}</div>
                                         <div class="text-gray-400">{{ $plg->user->email ?? '-' }}</div>
-                                    </td>
-                                    
-                                    <!-- PERBAIKAN: MEMANGGIL NAMA WILAYAH DARI RELASI WILAYAH PELAYANAN -->
-                                    <td class="p-3 text-xs">
-                                        <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold px-2.5 py-1 rounded-full">
-                                            {{ $plg->wilayahPelayanan->nama_wilayah ?? '-' }}
-                                        </span>
                                     </td>
                                     
                                     <td class="p-3 text-xs text-gray-600 max-w-xs truncate">
@@ -150,7 +114,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="p-6 text-center text-gray-400">Belum ada data warga yang terdaftar.</td>
+                                    <td colspan="7" class="p-6 text-center text-gray-400">Belum ada data warga yang terdaftar.</td>
                                 </tr>
                             @endforelse
                         </tbody>

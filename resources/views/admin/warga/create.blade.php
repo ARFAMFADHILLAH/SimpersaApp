@@ -30,26 +30,6 @@
                                 <textarea name="alamat_lengkap" id="alamat_lengkap" rows="3" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm">{{ old('alamat_lengkap') }}</textarea>
                                 @error('alamat_lengkap') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Rute</label>
-                                    <select name="rute_id" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm">
-                                        <option value="">Pilih Rute</option>
-                                        @foreach($rutes as $r)
-                                            <option value="{{ $r->id }}" {{ old('rute_id') == $r->id ? 'selected' : '' }}>{{ $r->nama_rute }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Wilayah</label>
-                                    <select name="wilayah_pelayanan_id" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm">
-                                        <option value="">Pilih Wilayah</option>
-                                        @foreach($wilayah as $w)
-                                            <option value="{{ $w->id }}" {{ old('wilayah_pelayanan_id') == $w->id ? 'selected' : '' }}>{{ $w->nama_wilayah }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Lokasi Rumah Warga</label>
                                 <x-lokasi-picker map-id="mapWargaBaru" address-input-id="alamat_lengkap" hint="Klik pada peta untuk menandai lokasi rumah, atau ketik alamat lalu tekan &quot;Cari dari Alamat&quot;." />

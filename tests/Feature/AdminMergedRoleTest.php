@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Pengaduan;
+use App\Models\JenisSampah;
+use App\Models\KategoriSampah;
 use App\Models\User;
-use App\Models\Warga;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -15,7 +15,7 @@ class AdminMergedRoleTest extends TestCase
 
     private function makeRoles(): void
     {
-        foreach (['admin', 'warga', 'petugas_lapangan'] as $r) {
+        foreach (['admin', 'warga', 'petugas_lapangan', 'bendahara', 'owner'] as $r) {
             DB::table('roles')->updateOrInsert(['name' => $r], ['created_at' => now(), 'updated_at' => now()]);
         }
     }
@@ -24,62 +24,63 @@ class AdminMergedRoleTest extends TestCase
     {
         $this->makeRoles();
         $roleAdmin = DB::table('roles')->where('name', 'admin')->value('id');
+
         return User::factory()->create(['role_id' => $roleAdmin, 'status' => 'aktif']);
     }
 
-    public function test_role_admin_bisa_akses_dashboard_dan_fitur_gabungan(): void
+    public function test_role_admin_bisa_akses_dashboard_dan_fitur_gabungan_pos(): void
     {
         $admin = $this->makeAdmin();
 
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.master.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.operasional.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.operasional.rekap-volume'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.operasional.jadwal-rute'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.logistik.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.warga.create'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
         $this->actingAs($admin)->get(route('admin.warga.index'))->assertOk();
-        $this->actingAs($admin)->get(route('admin.pengaduan.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.warga.create'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.kategori-sampah.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.jenis-sampah.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.gaji.index'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.sistem.index'))->assertOk();
     }
 
-    public function test_role_admin_bisa_verifikasi_dan_dispatch_pengaduan(): void
+    public function test_role_admin_bisa_kelola_master_data_sampah(): void
     {
         $admin = $this->makeAdmin();
-        $this->makeRoles();
-        $roleWarga = DB::table('roles')->where('name', 'warga')->value('id');
-        $userWarga = User::factory()->create(['role_id' => $roleWarga, 'status' => 'aktif']);
-        $warga = Warga::create([
-            'user_id' => $userWarga->id,
-            'no_warga' => 'WRG-TEST-002',
-            'no_hp' => '081234567891',
-            'alamat_lengkap' => 'Jl. Uji No. 2',
-        ]);
-        $pengaduan = Pengaduan::create([
-            'warga_id' => $warga->id,
-            'tipe_kendala' => 'Sampah Menumpuk',
-            'catatan_lokasi' => 'Depan rumah',
-            'status_respon' => 'Belum Dikerjakan',
+
+        $kategori = KategoriSampah::create(['nama_kategori' => 'Organik', 'keterangan' => 'Sisa organik']);
+        $jenis = JenisSampah::create([
+            'kategori_sampah_id' => $kategori->id,
+            'nama_jenis' => 'Sisa Makanan',
+            'tarif_per_kg' => 1500,
+            'tarif_jual_per_kg' => 2500,
         ]);
 
-        $response = $this->actingAs($admin)->post(route('admin.pengaduan.verifikasi', $pengaduan->id), [
-            'catatan_verifikasi' => 'Dicek',
+        $response = $this->actingAs($admin)->put(route('admin.jenis-sampah.update', $jenis->id), [
+            'nama_jenis' => 'Sisa Makanan',
+            'kategori_sampah_id' => $kategori->id,
+            'tarif_per_kg' => 1600,
+            'tarif_jual_per_kg' => 2600,
         ]);
-        $response->assertRedirect(route('admin.pengaduan.show', $pengaduan->id));
-        $this->assertDatabaseHas('pengaduan', ['id' => $pengaduan->id, 'status_respon' => 'Sedang Dikerjakan']);
+        $response->assertRedirect(route('admin.jenis-sampah.index'));
+        $this->assertDatabaseHas('jenis_sampah_dan_tarif', ['id' => $jenis->id, 'tarif_per_kg' => 1600]);
 
-        $this->makeRoles();
-        $rolePetugas = DB::table('roles')->where('name', 'petugas_lapangan')->value('id');
-        $petugas = User::factory()->create(['role_id' => $rolePetugas, 'status' => 'aktif']);
-
-        $response = $this->actingAs($admin)->post(route('admin.pengaduan.dispatch', $pengaduan->id), [
-            'petugas_id' => $petugas->id,
-            'catatan_dispatch' => 'Tolong ditangani',
+        $response = $this->actingAs($admin)->put(route('admin.kategori-sampah.update', $kategori->id), [
+            'nama_kategori' => 'Organik Sisa',
+            'keterangan' => 'Sisa organik rumah tangga',
         ]);
-        $response->assertRedirect(route('admin.pengaduan.show', $pengaduan->id));
-        $this->assertDatabaseHas('pengaduan', ['id' => $pengaduan->id, 'petugas_id' => $petugas->id]);
+        $response->assertRedirect(route('admin.kategori-sampah.index'));
+        $this->assertDatabaseHas('kategori_sampah', ['id' => $kategori->id, 'nama_kategori' => 'Organik Sisa']);
     }
 
-    public function test_role_admin_tidak_terdampak_halaman_administrasi_lama(): void
+    public function test_role_admin_tidak_mengakses_area_role_lain(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $this->actingAs($admin)->get(route('petugas.dashboard'))->assertForbidden();
+        $this->actingAs($admin)->get(route('bendahara.dashboard'))->assertForbidden();
+        $this->actingAs($admin)->get(route('owner.dashboard'))->assertForbidden();
+    }
+
+    public function test_role_admin_dan_role_asetetap_satu_entitas(): void
     {
         $admin = $this->makeAdmin();
 

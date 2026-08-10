@@ -8,7 +8,7 @@
                 <!-- Jika ingin meletakkan logo kecil saat mobile di sini, silakan.
                      Untuk desktop, area ini sengaja dikosongkan agar konten Anda sejajar di sebelah kanan sidebar. -->
                 <div class="sm:hidden shrink-0 flex items-center">
-                    <a href="{{ route('admin.dashboard') }}" class="font-bold text-gray-800 tracking-tight text-sm flex items-center gap-2">
+                    <a href="{{ route('dashboard') }}" class="font-bold text-gray-800 tracking-tight text-sm flex items-center gap-2">
                         <span class="bg-white p-0.5 rounded-lg"><img src="/logo-kisuci.png" alt="SIMPERSA" class="h-6 w-6 object-cover rounded-md"></span>
                         SIMPERSA
                     </a>
@@ -97,13 +97,13 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-gray-50 border-t border-gray-200">
         <div class="pt-2 pb-3 space-y-1">
             <!-- RUTE SIFAT MOBIL DIBAWAH INI SUDAH DIPERBAIKI -->
-            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('*.dashboard')">
                 {{ __('Dashboard Utama') }}
             </x-responsive-nav-link>
 
             <!-- Navigasi Cepat Tambahan untuk Mobile -->
-            <x-responsive-nav-link :href="route('admin.laporan.index')" :active="request()->routeIs('admin.laporan.*')">
-                {{ __('Laporan & Grafik') }}
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('*.laporan.*')">
+                {{ __('Buka Dashboard Saya') }}
             </x-responsive-nav-link>
         </div>
 

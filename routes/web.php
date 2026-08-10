@@ -1,66 +1,44 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotifikasiController;
 
-// Controller Admin
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\WargaController;
-use App\Http\Controllers\Admin\JenisSampahController;
-use App\Http\Controllers\Admin\IuranController;
-use App\Http\Controllers\Admin\LaporanController;
-use App\Http\Controllers\Admin\SistemController;
+// =========================================================================
+// CONTROLLER POS BANK SAMPAH (SIMPERSA)
+// =========================================================================
+// Admin (Super Admin)
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\KeputusanController;
-use App\Http\Controllers\Admin\NotifikasiController as AdminNotifikasiController;
-use App\Http\Controllers\Admin\PengaduanController as AdminPengaduanController;
-use App\Http\Controllers\Admin\ArmadaController;
-use App\Http\Controllers\Admin\WilayahPelayananController;
-use App\Http\Controllers\Admin\RuteController;
-use App\Http\Controllers\Admin\PengangkutanController;
-use App\Http\Controllers\Admin\MasterController;
-use App\Http\Controllers\Admin\BankSampahController;
-use App\Http\Controllers\Admin\MitraController;
-use App\Http\Controllers\Admin\OperasionalController;
-use App\Http\Controllers\Admin\LogistikController;
+use App\Http\Controllers\Admin\WargaController;
+use App\Http\Controllers\Admin\KategoriSampahController;
+use App\Http\Controllers\Admin\JenisSampahController;
 use App\Http\Controllers\Admin\GajiController;
+use App\Http\Controllers\Admin\SistemController;
+use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 
-// Controller Manager
-use App\Http\Controllers\Owner\LaporanController as ManagerLaporanCtrl;
-use App\Http\Controllers\Owner\ManagerLaporanController;
-use App\Http\Controllers\Owner\RuteController as ManagerRuteController;
-use App\Http\Controllers\Owner\DashboardController as ManagerDashboardController;
-use App\Http\Controllers\Owner\ManagerController;
-use App\Http\Controllers\Owner\ManagerArmadaController;
-use App\Http\Controllers\Owner\ManagerDSSController;
-use App\Http\Controllers\Owner\ManagerKeuanganController;
-use App\Http\Controllers\Owner\ManagerPengaduanController;
-use App\Http\Controllers\Owner\WargaController as ManagerWargaController;
+// Petugas (Kasir / Operasional)
+use App\Http\Controllers\Petugas_lapangan\DashboardController as KasirDashboardController;
+use App\Http\Controllers\Petugas_lapangan\AbsensiController as KasirAbsensiController;
+use App\Http\Controllers\Petugas_lapangan\KasirController;
+use App\Http\Controllers\Petugas_lapangan\GajiController as KasirGajiController;
 
-// Controller Petugas Lapangan
-use App\Http\Controllers\Petugas_lapangan\RuteController as PetugasLapanganRuteController;
-use App\Http\Controllers\Petugas_lapangan\PengangkutanController as PetugasLapanganPengangkutanController;
-use App\Http\Controllers\Petugas_lapangan\LaporanController as PetugasLapanganLaporanController;
-use App\Http\Controllers\Petugas_lapangan\AbsensiController as PetugasLapanganAbsensiController;
-use App\Http\Controllers\Petugas_lapangan\PengaduanController as PetugasLapanganPengaduanController;
-use App\Http\Controllers\Petugas_lapangan\DashboardController as PetugasLapanganDashboardController;
-use App\Http\Controllers\Petugas_lapangan\GajiController as PetugasLapanganGajiController;
-
-// Controller Warga
-use App\Http\Controllers\Warga\DashboardController as WargaDashboardController;
-use App\Http\Controllers\Warga\ProfileController as WargaProfileController;
-use App\Http\Controllers\Warga\IuranController as WargaIuranController;
-use App\Http\Controllers\Warga\PengaduanController as WargaPengaduanController;
-use App\Http\Controllers\Warga\NotifikasiController as WargaNotifikasiController;
-use App\Http\Controllers\Warga\SetoranController as WargaSetoranController;
-
-// Controller Bendahara
+// Bendahara (Keuangan)
 use App\Http\Controllers\Bendahara\DashboardController as BendaharaDashboardController;
-use App\Http\Controllers\BendaharaIuranController;
+use App\Http\Controllers\Bendahara\PenjualanController;
+use App\Http\Controllers\Bendahara\TabunganController;
+use App\Http\Controllers\Bendahara\PembelianController;
+use App\Http\Controllers\Bendahara\AbsensiController as BendaharaAbsensiController;
 use App\Http\Controllers\BendaharaGajiController;
-use App\Http\Controllers\BendaharaOperasionalController;
 use App\Http\Controllers\BendaharaLaporanController;
+
+// Owner (Pemantauan Read-Only)
+use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
+use App\Http\Controllers\Owner\LaporanController as OwnerLaporanController;
+use App\Http\Controllers\Owner\ManagerWargaController as OwnerWargaController;
+use App\Http\Controllers\Owner\PenggunaController as OwnerPenggunaController;
+use App\Http\Controllers\Owner\ManagerKeuanganController as OwnerKeuanganController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -71,169 +49,88 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Modul 13: Notifikasi In-App (Semua Role)
-    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/{id}/baca', [NotifikasiController::class, 'tandaiBaca'])->name('notifikasi.baca');
-    Route::post('/notifikasi/semua-baca', [NotifikasiController::class, 'tandaiSemuaBaca'])->name('notifikasi.semua-baca');
 });
 
 // =========================================================================
-// AREA KHUSUS ADMIN (GABUNGAN SUPER ADMIN & ADMINISTRASI)
+// AREA SUPER ADMIN — MASTER DATA & PENGATURAN
 // =========================================================================
 Route::middleware(['auth', 'role:admin,administrator,administrasi'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // System Utilities
-    Route::get('/sistem', [SistemController::class, 'index'])->name('sistem.index');
-    Route::post('/sistem/pengingat', [SistemController::class, 'kirimPengingat'])->name('sistem.pengingat');
-    Route::get('/sistem/backup', [SistemController::class, 'backupDatabase'])->name('sistem.backup');
-
-    // Master Data Management
-    Route::resource('/jenis-sampah', JenisSampahController::class)->except(['create', 'edit', 'show'])->names('jenis-sampah');
-    Route::resource('/warga', WargaController::class)->names('warga');
-    Route::resource('/armada', ArmadaController::class)->names('armada');
-    Route::resource('/wilayah-pelayanan', WilayahPelayananController::class)->except(['create', 'show'])->names('wilayah');
+    // Manajemen Pengguna
     Route::resource('/users', UserController::class)->except('show')->names('users');
 
-    // Bank Sampah: Mitra (data saja, tanpa login) & Setoran Warga
-    Route::get('/bank-sampah', [BankSampahController::class, 'index'])->name('bank-sampah.index');
-    Route::post('/bank-sampah', [BankSampahController::class, 'store'])->name('bank-sampah.store');
-    Route::delete('/bank-sampah/{id}', [BankSampahController::class, 'destroy'])->name('bank-sampah.destroy');
-    Route::get('/mitra', [MitraController::class, 'index'])->name('mitra.index');
-    Route::put('/mitra', [MitraController::class, 'update'])->name('mitra.update');
+    // Manajemen Data Nasabah (Warga)
+    Route::resource('/warga', WargaController::class)->names('warga');
 
-    // Parameter & Rule Configurations
-    Route::get('/iuran/pengaturan', [IuranController::class, 'index'])->name('iuran.index');
-    Route::put('/iuran/pengaturan', [IuranController::class, 'updatePengaturan'])->name('iuran.update-pengaturan');
+    // Master Data Sampah: Kategori & Jenis (Harga Beli = bayar ke warga, Harga Jual = jual ke pengepul)
+    Route::resource('/kategori-sampah', KategoriSampahController::class)->except(['create', 'edit', 'show'])->names('kategori-sampah');
+    Route::resource('/jenis-sampah', JenisSampahController::class)->except(['create', 'edit', 'show'])->names('jenis-sampah');
 
-    // Parameter Penggajian Petugas
+    // Standar Gaji Pokok Petugas
     Route::get('/gaji/pengaturan', [GajiController::class, 'index'])->name('gaji.index');
     Route::put('/gaji/pengaturan', [GajiController::class, 'updatePengaturan'])->name('gaji.update-pengaturan');
 
-    // Monitoring & GIS Rute (Read/Setup Only)
-    Route::get('/rute/{id}/peta', [RuteController::class, 'peta'])->name('rute.peta');
-    Route::resource('rute', RuteController::class)->only(['index', 'store']);
+    // Rekap Kehadiran Petugas
+    Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
 
-    // Log Monitoring Operasional Sampah (Monitoring & Audit Only - Tanpa Direct Input)
-    Route::get('/pengangkutan', [PengangkutanController::class, 'index'])->name('pengangkutan.index');
-
-    // Laporan & Audit System
-    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-    Route::post('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
-
-    // Decision Support System (DSS) Parameter Config
-    Route::get('/keputusan', [KeputusanController::class, 'index'])->name('keputusan.index');
-    Route::post('/keputusan/kriteria', [KeputusanController::class, 'storeKriteria'])->name('keputusan.kriteria.store');
-    Route::put('/keputusan/kriteria/{id}', [KeputusanController::class, 'updateKriteria'])->name('keputusan.kriteria.update');
-    Route::delete('/keputusan/kriteria/{id}', [KeputusanController::class, 'destroyKriteria'])->name('keputusan.kriteria.destroy');
-    Route::post('/keputusan/skor', [KeputusanController::class, 'storeSkor'])->name('keputusan.skor.store');
-
-    // Template & Schedule Notification
-    Route::get('/notifikasi', [AdminNotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/template', [AdminNotifikasiController::class, 'storeTemplate'])->name('notifikasi.template.store');
-    Route::put('/notifikasi/template/{id}', [AdminNotifikasiController::class, 'updateTemplate'])->name('notifikasi.template.update');
-    Route::delete('/notifikasi/template/{id}', [AdminNotifikasiController::class, 'destroyTemplate'])->name('notifikasi.template.destroy');
-    Route::post('/notifikasi/jadwal', [AdminNotifikasiController::class, 'storeJadwal'])->name('notifikasi.jadwal.store');
-    Route::put('/notifikasi/jadwal/{id}', [AdminNotifikasiController::class, 'updateJadwal'])->name('notifikasi.jadwal.update');
-    Route::delete('/notifikasi/jadwal/{id}', [AdminNotifikasiController::class, 'destroyJadwal'])->name('notifikasi.jadwal.destroy');
-
-    // Monitoring Pengaduan (Monitoring + Verifikasi & Dispatch)
-    Route::get('/pengaduan', [AdminPengaduanController::class, 'index'])->name('pengaduan.index');
-    Route::get('/pengaduan/{id}', [AdminPengaduanController::class, 'show'])->name('pengaduan.show');
-    Route::post('/pengaduan/{id}/verifikasi', [AdminPengaduanController::class, 'verifikasi'])->name('pengaduan.verifikasi');
-    Route::post('/pengaduan/{id}/dispatch', [AdminPengaduanController::class, 'dispatch'])->name('pengaduan.dispatch');
-
-    // Master Data (Edit Warga, Armada) - dari Panel Administrasi
-    Route::get('/master', [MasterController::class, 'index'])->name('master.index');
-    Route::get('/master/warga/{id}/edit', [MasterController::class, 'editWarga'])->name('master.warga.edit');
-    Route::put('/master/warga/{id}', [MasterController::class, 'updateWarga'])->name('master.warga.update');
-    Route::get('/master/armada/{id}/edit', [MasterController::class, 'editArmada'])->name('master.armada.edit');
-    Route::put('/master/armada/{id}', [MasterController::class, 'updateArmada'])->name('master.armada.update');
-
-    // Operasional: Rekap Volume & Jadwal Rute / Penugasan - dari Panel Administrasi
-    Route::get('/operasional', [OperasionalController::class, 'index'])->name('operasional.index');
-    Route::get('/operasional/rekap-volume', [OperasionalController::class, 'rekapVolume'])->name('operasional.rekap-volume');
-    Route::get('/operasional/jadwal-rute', [OperasionalController::class, 'jadwalRute'])->name('operasional.jadwal-rute');
-    Route::post('/operasional/tugaskan', [OperasionalController::class, 'tugaskanPetugas'])->name('operasional.tugaskan');
-    Route::post('/operasional/warga/{id}/urut', [OperasionalController::class, 'ubahUrutan'])->name('operasional.urut');
-
-    // Logistik Armada (Pengeluaran Operasional) - Monitoring (Baca-Saja, input oleh bendahara)
-    Route::get('/logistik', [LogistikController::class, 'index'])->name('logistik.index');
+    // Utilitas Sistem (Backup Data)
+    Route::get('/sistem', [SistemController::class, 'index'])->name('sistem.index');
+    Route::get('/sistem/backup', [SistemController::class, 'backupDatabase'])->name('sistem.backup');
 });
 
 // =========================================================================
-// AREA KHUSUS OWNER / PEMILIK (PEMANTAUAN READ-ONLY)
+// AREA OWNER / PEMILIK (PEMANTAUAN READ-ONLY)
 // =========================================================================
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
 
-    // 1. Dashboard Utama
-    Route::get('/dashboard', [ManagerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
 
-    // 2. DSS & Rekomendasi / Evaluasi Prioritas Wilayah
-    Route::get('/dss', [ManagerDSSController::class, 'index'])->name('dss.index');
+    // Pusat Laporan Monitoring
+    Route::get('/laporan', [OwnerLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/kas', [OwnerLaporanController::class, 'kas'])->name('laporan.kas');
+    Route::get('/laporan/pembelian', [OwnerLaporanController::class, 'pembelian'])->name('laporan.pembelian');
+    Route::get('/laporan/penjualan', [OwnerLaporanController::class, 'penjualan'])->name('laporan.penjualan');
+    Route::get('/laporan/gaji', [OwnerLaporanController::class, 'gaji'])->name('laporan.gaji');
+    Route::get('/laporan/tabungan', [OwnerLaporanController::class, 'tabungan'])->name('laporan.tabungan');
 
-    // 3. Pusat Laporan Executif & Sub-Laporan
-    Route::get('/laporan', [ManagerLaporanCtrl::class, 'index'])->name('laporan.index');
-    Route::post('/laporan/cetak', [ManagerLaporanCtrl::class, 'cetak'])->name('laporan.cetak');
-    Route::get('/laporan/warga', [ManagerLaporanController::class, 'warga'])->name('laporan.warga');
-    Route::get('/laporan/iuran', [ManagerLaporanController::class, 'iuran'])->name('laporan.iuran');
-    Route::get('/laporan/volume', [ManagerLaporanController::class, 'volume'])->name('laporan.volume');
-    Route::get('/laporan/keuangan', [ManagerLaporanController::class, 'keuangan'])->name('laporan.keuangan');
-    Route::get('/laporan/gaji', [ManagerLaporanController::class, 'gaji'])->name('laporan.gaji');
-    Route::get('/laporan/armada', [ManagerLaporanController::class, 'armada'])->name('laporan.armada');
-    Route::get('/laporan/tunggakan', [ManagerLaporanController::class, 'tunggakan'])->name('laporan.tunggakan');
-    Route::get('/laporan/petugas', [ManagerLaporanController::class, 'petugas'])->name('laporan.petugas');
-    Route::get('/laporan/rekap-tahunan', [ManagerLaporanController::class, 'rekapTahunan'])->name('laporan.rekap-tahunan');
-    Route::get('/laporan/kendala', [ManagerLaporanController::class, 'kendala'])->name('laporan.kendala');
-
-    // 4. Monitoring Warga
-    Route::get('/warga', [ManagerWargaController::class, 'index'])->name('warga.index');
-
-    // 5. Arus Kas & Gaji (Keuangan)
-    Route::get('/keuangan', [ManagerKeuanganController::class, 'index'])->name('keuangan.index');
-
-    // 6. Kondisi Armada & Rute Operasional
-    Route::get('/armada', [ManagerArmadaController::class, 'index'])->name('armada.index');
-    Route::get('/rute', [ManagerRuteController::class, 'index'])->name('rute.index');
-    Route::get('/rute/{id}/peta', [ManagerRuteController::class, 'peta'])->name('rute.peta');
-
-    // 7. Log Pengaduan
-    Route::get('/pengaduan', [ManagerPengaduanController::class, 'index'])->name('pengaduan.index');
-
-    // 8. Iuran
-    Route::get('/iuran', [ManagerController::class, 'iuran'])->name('iuran.index');
+    // Monitoring Data Operasional
+    Route::get('/keuangan', [OwnerKeuanganController::class, 'index'])->name('keuangan.index');
+    Route::get('/warga', [OwnerWargaController::class, 'index'])->name('warga.index');
+    Route::get('/pengguna', [OwnerPenggunaController::class, 'index'])->name('pengguna.index');
 });
 
 // =========================================================================
-// AREA KHUSUS BENDAHARA / KEUANGAN
+// AREA BENDAHARA / KEUANGAN
 // =========================================================================
 Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->name('bendahara.')->group(function () {
 
     Route::get('/dashboard', [BendaharaDashboardController::class, 'index'])->name('dashboard');
 
-    // ===== Modul 5: Manajemen Iuran =====
-    Route::get('/iuran', [BendaharaIuranController::class, 'index'])->name('iuran.index');
-    Route::post('/iuran/generate', [BendaharaIuranController::class, 'generate'])->name('iuran.generate');
-    Route::post('/iuran/bayar/{id}', [BendaharaIuranController::class, 'bayar'])->name('iuran.bayar');
-    Route::get('/iuran/kwitansi/{id}', [BendaharaIuranController::class, 'cetakKwitansi'])->name('iuran.kwitansi');
-    Route::get('/iuran/tunggakan', [BendaharaIuranController::class, 'tunggakan'])->name('tunggakan');
+    // Penjualan Sampah ke Pengepul (Input & Rekap)
+    Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+    Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
 
-    // ===== Modul 6: Penggajian Petugas =====
+    // Rincian Pembelian Sampah Warga
+    Route::get('/pembelian', [PembelianController::class, 'index'])->name('pembelian.index');
+
+    // Tabungan Warga & Penarikan Dana
+    Route::get('/tabungan', [TabunganController::class, 'index'])->name('tabungan.index');
+    Route::post('/tabungan/penarikan', [TabunganController::class, 'storePenarikan'])->name('tabungan.penarikan.store');
+    Route::put('/tabungan/penarikan/{id}/ditarik', [TabunganController::class, 'tandaiDitarik'])->name('tabungan.penarikan.ditarik');
+
+    // Penggajian Petugas (Gaji Pokok + Bonus)
     Route::get('/penggajian', [BendaharaGajiController::class, 'index'])->name('penggajian.index');
     Route::post('/penggajian/proses', [BendaharaGajiController::class, 'prosesGaji'])->name('penggajian.proses');
     Route::post('/penggajian/bayar/{id}', [BendaharaGajiController::class, 'bayarGaji'])->name('penggajian.bayar');
     Route::get('/penggajian/slip/{id}', [BendaharaGajiController::class, 'cetakSlip'])->name('penggajian.slip');
     Route::get('/penggajian/rekap', [BendaharaGajiController::class, 'rekapGaji'])->name('penggajian.rekap');
 
-    // ===== Modul 7: Manajemen Operasional =====
-    Route::get('/operasional', [BendaharaOperasionalController::class, 'index'])->name('operasional.index');
-    Route::post('/operasional/store', [BendaharaOperasionalController::class, 'store'])->name('operasional.store');
-    Route::post('/operasional/verifikasi/{id}', [BendaharaOperasionalController::class, 'verifikasi'])->name('operasional.verifikasi');
-    Route::delete('/operasional/{id}', [BendaharaOperasionalController::class, 'destroy'])->name('operasional.destroy');
+    // Rekap Kehadiran Petugas
+    Route::get('/absensi', [BendaharaAbsensiController::class, 'index'])->name('absensi.index');
 
-    // ===== Modul 8: Laporan Keuangan & Laba Rugi =====
+    // Laporan Keuangan (Arus Kas Masuk & Keluar)
     Route::get('/laporan', [BendaharaLaporanController::class, 'index'])->name('laporan.index');
     Route::post('/laporan/cetak', [BendaharaLaporanController::class, 'cetak'])->name('laporan.cetak');
     Route::get('/laporan/grafik', [BendaharaLaporanController::class, 'dataGrafik'])->name('laporan.grafik');
@@ -242,75 +139,38 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->name('bendah
 });
 
 // =========================================================================
-// AREA KHUSUS PETUGAS LAPANGAN 
+// AREA PETUGAS / KASIR (Operasional Konter)
 // =========================================================================
 Route::middleware(['auth', 'role:petugas,petugas_lapangan'])->prefix('petugas')->name('petugas.')->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [PetugasLapanganDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [KasirDashboardController::class, 'index'])->name('dashboard');
 
-    // ===== Modul 3: Rute, Jadwal & Monitoring Operasional =====
-    Route::get('/rute', [PetugasLapanganRuteController::class, 'index'])->name('rute.index');
-    Route::get('/rute/tugas-harian', [PetugasLapanganRuteController::class, 'tugasHarian'])->name('rute.tugas');
-    Route::get('/rute/{id}', [PetugasLapanganRuteController::class, 'show'])->name('rute.detail');
-    Route::post('/rute/{id}/update-status', [PetugasLapanganRuteController::class, 'updateStatus'])->name('rute.update');
+    // Transaksi Pembelian Sampah dari Warga + Cetak Nota
+    Route::get('/pembelian', [KasirController::class, 'pembelian'])->name('pembelian.index');
+    Route::post('/pembelian', [KasirController::class, 'storePembelian'])->name('pembelian.store');
+    Route::get('/pembelian/nota/{id}', [KasirController::class, 'nota'])->name('pembelian.nota');
 
-    // ===== Modul 4: Pengelolaan Sampah (Hasil Pengangkutan per Titik) =====
-    Route::post('/pengangkutan/{id}/upload-foto', [PetugasLapanganPengangkutanController::class, 'uploadFoto'])->name('pengangkutan.upload');
+    // Pencatatan Penjualan Sampah ke Pengepul
+    Route::get('/penjualan', [KasirController::class, 'penjualan'])->name('penjualan.index');
+    Route::post('/penjualan', [KasirController::class, 'storePenjualan'])->name('penjualan.store');
 
-    // ===== Modul 11: Penugasan & Disposisi Pengaduan =====
-    Route::get('/pengaduan', [PetugasLapanganPengaduanController::class, 'index'])->name('pengaduan.index');
-    Route::get('/pengaduan/{id}', [PetugasLapanganPengaduanController::class, 'show'])->name('pengaduan.show');
-    Route::post('/pengaduan/{id}/update', [PetugasLapanganPengaduanController::class, 'updateStatus'])->name('pengaduan.update');
+    // Absensi (Clock-In / Clock-Out)
+    Route::get('/absensi', [KasirAbsensiController::class, 'index'])->name('absensi.index');
+    Route::post('/absensi/clockin', [KasirAbsensiController::class, 'clockIn'])->name('absensi.clockin');
+    Route::post('/absensi/clockout', [KasirAbsensiController::class, 'clockOut'])->name('absensi.clockout');
 
-    // ===== Modul 6: Gaji & Presensi =====
-    Route::get('/gaji', [PetugasLapanganGajiController::class, 'index'])->name('gaji.index');
-
-    // Laporan Kendala Lapangan
-    Route::get('/laporan', [PetugasLapanganLaporanController::class, 'index'])->name('laporan.index');
-    Route::post('/laporan', [PetugasLapanganLaporanController::class, 'store'])->name('laporan.store');
-
-    // Absensi Harian (Clock-In / Clock-Out)
-    Route::post('/absensi/clock-in', [PetugasLapanganAbsensiController::class, 'clockIn'])->name('absensi.clockin');
-    Route::post('/absensi/clock-out', [PetugasLapanganAbsensiController::class, 'clockOut'])->name('absensi.clockout');
-
-});
-
-// =========================================================================
-// AREA KHUSUS WARGA / MASYARAKAT
-// =========================================================================
-Route::middleware(['auth', 'role:warga'])->prefix('warga')->name('warga.')->group(function () {
-
-    // Dashboard
-    Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('dashboard');
-
-    // Modul 2: Profil & Riwayat Pengangkutan
-    Route::get('/profil', [WargaProfileController::class, 'index'])->name('profile');
-    Route::get('/riwayat', [WargaProfileController::class, 'riwayat'])->name('profile.riwayat');
-
-    // Modul 5: Iuran & Pembayaran
-    Route::get('/iuran', [WargaIuranController::class, 'index'])->name('iuran.index');
-    Route::post('/iuran/{id}/bayar', [WargaIuranController::class, 'bayar'])->name('iuran.bayar');
-    Route::get('/iuran/{id}/kwitansi', [WargaIuranController::class, 'kwitansi'])->name('iuran.kwitansi');
-
-    // Modul 11: Pengaduan Masyarakat
-    Route::get('/pengaduan', [WargaPengaduanController::class, 'index'])->name('pengaduan.index');
-    Route::get('/pengaduan/create', [WargaPengaduanController::class, 'create'])->name('pengaduan.create');
-    Route::post('/pengaduan', [WargaPengaduanController::class, 'store'])->name('pengaduan.store');
-
-    // Bank Sampah: Riwayat Setoran Warga (dibayar tunai oleh mitra)
-    Route::get('/bank-sampah', [WargaSetoranController::class, 'index'])->name('bank-sampah.index');
-
-    // Modul 13: Notifikasi
-    Route::get('/notifikasi', [WargaNotifikasiController::class, 'index'])->name('notifikasi.index');
+    // Gaji & Slip Gaji Pribadi
+    Route::get('/gaji', [KasirGajiController::class, 'index'])->name('gaji.index');
+    Route::get('/gaji/slip/{id}', [KasirGajiController::class, 'slip'])->name('gaji.slip');
 });
 
 // =========================================================================
 // REDIRECT OTOMATIS SESUAI ROLE (AFTER LOGIN)
 // =========================================================================
 Route::get('/dashboard', function () {
-    $user = auth()->user();
-    $userRole = \DB::table('roles')->where('id', $user->role_id)->first();
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+    $userRole = DB::table('roles')->where('id', $user->role_id)->first();
 
     if ($userRole) {
         $roleName = strtolower(trim($userRole->name));
@@ -323,16 +183,12 @@ Route::get('/dashboard', function () {
             return redirect()->route('owner.dashboard');
         }
 
-        if ($roleName === 'bendahara') {
+        if (in_array($roleName, ['bendahara'])) {
             return redirect()->route('bendahara.dashboard');
         }
 
         if (in_array($roleName, ['petugas', 'petugas_lapangan'])) {
             return redirect()->route('petugas.dashboard');
-        }
-
-        if (in_array($roleName, ['warga'])) {
-            return redirect()->route('warga.dashboard');
         }
     }
 

@@ -3,95 +3,44 @@
 namespace App\Http\Controllers\Petugas_lapangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pengangkutan;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\SetoranSampah;
+use App\Models\PenjualanSampah;
+use App\Models\Warga;
+use App\Models\PenarikanSaldo;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $userId = auth()->id();
+        // Transaksi hari ini
+        $totalSetoranHariIni = SetoranSampah::whereDate('tanggal_setoran', today())->count();
+        $totalKgHariIni = (float) SetoranSampah::whereDate('tanggal_setoran', today())->sum('berat_kg');
+        $totalRupiahHariIni = (int) SetoranSampah::whereDate('tanggal_setoran', today())->sum('total_bayar');
 
-        // 1. Tugas pengangkutan milik petugas yang login (hari ini, fallback ke penugasan terakhir)
-        $tugas = Pengangkutan::with(['warga.user', 'warga.rute', 'armada'])
-            ->where('petugas_id', $userId)
-            ->whereDate('tanggal_tugas', today())
+        $totalPenjualanHariIni = (int) PenjualanSampah::whereDate('tanggal_penjualan', today())->sum('total_harga');
+        $totalKgJualHariIni = (float) PenjualanSampah::whereDate('tanggal_penjualan', today())->sum('berat_kg');
+
+        // Transaksi terbaru
+        $transaksiTerbaru = SetoranSampah::with('warga.user', 'jenisSampah')
+            ->latest('tanggal_setoran')
+            ->take(6)
             ->get();
 
-        $adaJadwalHariIni = $tugas->isNotEmpty();
-
-        if ($tugas->isEmpty()) {
-            $tugas = Pengangkutan::with(['warga.user', 'warga.rute', 'armada'])
-                ->where('petugas_id', $userId)
-                ->latest('tanggal_tugas')
-                ->get();
-        }
-
-        // 2. Kelompokkan berdasarkan rute yang ditugaskan, lengkap dengan daftar warga-nya
-        $routesHariIni = $tugas->filter(fn ($t) => $t->warga && $t->warga->rute)
-            ->groupBy(fn ($t) => $t->warga->rute_id)
-            ->map(function ($group) use ($adaJadwalHariIni) {
-                $rute = $group->first()->warga->rute;
-                $selesai = $group->where('status_tugas', 'Selesai')->count();
-
-                return (object) [
-                    'id' => $rute->id,
-                    'nama_rute' => $rute->nama_rute,
-                    'hari_angkut' => $rute->hari_angkut,
-                    'keterangan' => $rute->keterangan,
-                    'total' => $group->count(),
-                    'selesai' => $selesai,
-                    'status' => $selesai === $group->count()
-                        ? 'Selesai'
-                        : ($selesai > 0 ? 'Sedang dikerjakan' : 'Belum dikerjakan'),
-                    'adaJadwalHariIni' => $adaJadwalHariIni,
-                    'armada' => $group->first()->armada,
-                    'warga' => $group->map(function ($t) {
-                        return (object) [
-                            'pengangkutan_id' => $t->id,
-                            'nama_warga' => $t->warga->user->name ?? 'Warga',
-                            'alamat_lengkap' => $t->warga->alamat_lengkap ?? '-',
-                            'status_tugas' => $t->status_tugas,
-                            'urutan' => (int) ($t->warga->urutan ?? 0),
-                        ];
-                    })->sortBy('urutan')->values(),
-                ];
-            })
-            ->values();
-
-        // 3. Statistik tugas hari ini (hanya milik petugas ini)
-        $sisaTugas = Pengangkutan::where('petugas_id', $userId)
-            ->whereDate('tanggal_tugas', today())
-            ->where('status_tugas', '!=', 'Selesai')
-            ->count();
-
-        $selesaiTugas = Pengangkutan::where('petugas_id', $userId)
-            ->whereDate('tanggal_tugas', today())
-            ->where('status_tugas', 'Selesai')
-            ->count();
-
-        // 4. Laporan kendala yang pernah dikirim petugas ini
-        $totalLaporan = DB::table('laporan_kendalas')
-            ->where('petugas_id', $userId)
-            ->count();
-
-        $laporanTerbaru = DB::table('laporan_kendalas')
-            ->where('petugas_id', $userId)
-            ->latest('created_at')
-            ->take(3)
-            ->get();
-
-        // 5. Armada yang ditugaskan (untuk kartu selamat bertugas)
-        $armadaSaya = $tugas->first()?->armada;
+        // Status tabungan warga
+        $totalNasabah = Warga::count();
+        $saldoTerbesar = Warga::with('user')->orderByDesc('saldo_tabungan')->first();
+        $penarikanMenunggu = PenarikanSaldo::where('status', 'Diproses')->count();
 
         return view('petugas_lapangan.dashboard', compact(
-            'routesHariIni',
-            'sisaTugas',
-            'selesaiTugas',
-            'totalLaporan',
-            'laporanTerbaru',
-            'armadaSaya'
+            'totalSetoranHariIni',
+            'totalKgHariIni',
+            'totalRupiahHariIni',
+            'totalPenjualanHariIni',
+            'totalKgJualHariIni',
+            'transaksiTerbaru',
+            'totalNasabah',
+            'saldoTerbesar',
+            'penarikanMenunggu'
         ));
     }
 }

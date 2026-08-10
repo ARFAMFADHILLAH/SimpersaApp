@@ -4,19 +4,23 @@
         <span class="text-[10px]">Dashboard</span>
     </a>
     <a href="{{ route('admin.warga.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.warga*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
         <span class="text-[10px]">Warga</span>
     </a>
-    <a href="{{ route('admin.iuran.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.iuran*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-        <span class="text-[10px]">Iuran</span>
+    <a href="{{ route('admin.kategori-sampah.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.kategori-sampah*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2" /></svg>
+        <span class="text-[10px]">Kategori</span>
     </a>
-    <a href="{{ route('admin.pengangkutan.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.pengangkutan*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" /></svg>
-        <span class="text-[10px]">Angkut</span>
+    <a href="{{ route('admin.jenis-sampah.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.jenis-sampah*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h16M3 10h16M3 14h16M3 18h16" /></svg>
+        <span class="text-[10px]">Tarif</span>
     </a>
-    <a href="{{ route('admin.laporan.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.laporan*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        <span class="text-[10px]">Laporan</span>
+    <a href="{{ route('admin.users.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.users*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+        <span class="text-[10px]">Pengguna</span>
+    </a>
+    <a href="{{ route('admin.absensi.index') }}" class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.absensi*') ? 'text-green-400 font-bold' : 'text-zinc-400' }}">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span class="text-[10px]">Absensi</span>
     </a>
 </nav>

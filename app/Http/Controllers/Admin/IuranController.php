@@ -35,12 +35,15 @@ class IuranController extends Controller
             'tgl_jatuh_tempo'            => 'required|numeric|min:1|max:31',
         ]);
 
-        $pengaturan = PengaturanIuran::firstOrCreate([
-            'tarif_dasar_bulanan' => 20000,
-            'persentase_denda_per_bulan' => 5,
-            'nominal_denda_flat' => 5000,
-            'tgl_jatuh_tempo' => 10,
-        ]);
+        $pengaturan = PengaturanIuran::firstOrCreate(
+            ['id' => 1],
+            [
+                'tarif_dasar_bulanan' => 20000,
+                'persentase_denda_per_bulan' => 5,
+                'nominal_denda_flat' => 5000,
+                'tgl_jatuh_tempo' => 10,
+            ]
+        );
         $pengaturan->update($validated);
 
         return redirect()->back()->with('success', 'Parameter tarif & denda berhasil diperbarui!');

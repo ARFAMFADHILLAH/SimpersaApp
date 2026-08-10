@@ -3,64 +3,120 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Iuran;
-use App\Models\GajiPetugas;
-use App\Models\Pengeluaran;
-use App\Models\Warga;
+use App\Models\SetoranSampah;
+use App\Models\PenjualanSampah;
+use App\Models\PenarikanSaldo;
 use App\Models\Penggajian;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $bulanIni = Carbon::now()->month;
-        $tahunIni = Carbon::now()->year;
+        $bulanIni = now()->month;
+        $tahunIni = now()->year;
 
-        // 1. KEUANGAN (Ringkasan Kas)
-        $totalPemasukanBulanIni = Iuran::where('status_pembayaran', 'Lunas')
-            ->whereMonth('tanggal_bayar', $bulanIni)
-            ->whereYear('tanggal_bayar', $tahunIni)
-            ->sum('jumlah_tagihan');
+        // Pemasukan kas = penjualan ke pengepul
+        $totalPemasukanBulanIni = (int) PenjualanSampah::whereMonth('tanggal_penjualan', $bulanIni)
+            ->whereYear('tanggal_penjualan', $tahunIni)
+            ->sum('total_harga');
 
-        $totalGajiBulanIni = Penggajian::whereMonth('created_at', $bulanIni)
-          ->whereYear('created_at', $tahunIni)
-          ->sum('total_gaji_bersih');
+        // Pengeluaran kas bulan ini: belanja warga + penarikan ditarik + gaji dibayar
+        $totalBelanjaBulanIni = (int) SetoranSampah::whereMonth('tanggal_setoran', $bulanIni)
+            ->whereYear('tanggal_setoran', $tahunIni)
+            ->sum('total_bayar');
 
-        $totalOperasionalBulanIni = Pengeluaran::whereMonth('tanggal_pengeluaran', $bulanIni)
-            ->whereYear('tanggal_pengeluaran', $tahunIni)
-            ->sum('jumlah_biaya');
+        $totalPenarikanBulanIni = (int) PenarikanSaldo::where('status', 'Ditarik')
+            ->whereMonth('tanggal_penarikan', $bulanIni)
+            ->whereYear('tanggal_penarikan', $tahunIni)
+            ->sum('nominal');
 
-        $totalPengeluaranBulanIni = $totalGajiBulanIni + $totalOperasionalBulanIni;
-        $sisaLabaRugiBersih = $totalPemasukanBulanIni - $totalPengeluaranBulanIni;
+        $totalGajiBulanIni = (int) Penggajian::where('status_pembayaran', 'Dibayar')
+            ->whereMonth('created_at', $bulanIni)
+            ->whereYear('created_at', $tahunIni)
+            ->sum('total_gaji_bersih');
 
-        // 2. MONITORING TUNGGAKAN IURAN
-        $totalWargaMenunggak = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->count();
-        $totalNominalTunggakan = Iuran::whereIn('status_pembayaran', ['Belum Bayar', 'Sedang Diproses'])->sum('jumlah_tagihan');
+        $totalPengeluaranBulanIni = $totalBelanjaBulanIni + $totalPenarikanBulanIni + $totalGajiBulanIni;
+        $sisaKasBulanIni = $totalPemasukanBulanIni - $totalPengeluaranBulanIni;
 
-        // Data 5 Transaksi Pembayaran Iuran Terbaru
-        $transaksiTerbaru = Iuran::with('warga.user')
-            ->where('status_pembayaran', 'Lunas')
-            ->latest('tanggal_bayar')
-            ->take(5)
+        // Penarikan yang belum dikonfirmasi
+        $penarikanMenunggu = PenarikanSaldo::with('warga.user')
+            ->where('status', 'Diproses')
+            ->orderByDesc('tanggal_penarikan')
             ->get();
 
-        // 3. PENGELUARAN OPERASIONAL TERBARU (BBM, Servis, dll)
-        $operasionalTerbaru = Pengeluaran::latest('tanggal_pengeluaran')
-            ->take(5)
+        // Penggajian belum dibayar bulan ini
+        $gajiBelumBayar = Penggajian::with('petugas')
+            ->where('status_pembayaran', 'Belum Dibayar')
+            ->orderByDesc('created_at')
+            ->take(6)
             ->get();
+
+        // Transaksi terbaru (gabungan belanja & jual)
+        $transaksiTerbaru = collect();
+
+        SetoranSampah::with('warga.user')->latest('tanggal_setoran')->take(5)->get()->each(function ($t) use (&$transaksiTerbaru) {
+            $transaksiTerbaru->push((object) [
+                'tanggal' => $t->tanggal_setoran,
+                'keterangan' => 'Belanja: ' . ($t->warga->user->name ?? 'Warga'),
+                'tipe' => 'Keluar',
+                'jumlah' => $t->total_bayar,
+            ]);
+        });
+
+        PenjualanSampah::with('jenisSampah')->latest('tanggal_penjualan')->take(5)->get()->each(function ($t) use (&$transaksiTerbaru) {
+            $transaksiTerbaru->push((object) [
+                'tanggal' => $t->tanggal_penjualan,
+                'keterangan' => 'Penjualan: ' . ($t->jenisSampah->nama_jenis ?? '-') . ' → ' . ($t->nama_pengepul ?? 'pengepul'),
+                'tipe' => 'Masuk',
+                'jumlah' => $t->total_harga,
+            ]);
+        });
+
+        $transaksiTerbaru = $transaksiTerbaru->sortByDesc('tanggal')->take(8)->values();
+
+        // Grafik 6 bulan pemasukan vs pengeluaran
+        $grafikBulan = [];
+        $grafikMasuk = [];
+        $grafikKeluar = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $bulanDate = now()->subMonths($i);
+
+            $masuk = (int) PenjualanSampah::whereYear('tanggal_penjualan', $bulanDate->year)
+                ->whereMonth('tanggal_penjualan', $bulanDate->month)
+                ->sum('total_harga');
+
+            $keluar = (int) SetoranSampah::whereYear('tanggal_setoran', $bulanDate->year)
+                ->whereMonth('tanggal_setoran', $bulanDate->month)
+                ->sum('total_bayar')
+                + (int) PenarikanSaldo::where('status', 'Ditarik')
+                    ->whereYear('tanggal_penarikan', $bulanDate->year)
+                    ->whereMonth('tanggal_penarikan', $bulanDate->month)
+                    ->sum('nominal')
+                + (int) Penggajian::where('status_pembayaran', 'Dibayar')
+                    ->whereYear('created_at', $bulanDate->year)
+                    ->whereMonth('created_at', $bulanDate->month)
+                    ->sum('total_gaji_bersih');
+
+            $grafikBulan[] = $bulanDate->format('M Y');
+            $grafikMasuk[] = $masuk;
+            $grafikKeluar[] = $keluar;
+        }
 
         return view('bendahara.dashboard', compact(
             'totalPemasukanBulanIni',
+            'totalBelanjaBulanIni',
+            'totalPenarikanBulanIni',
             'totalGajiBulanIni',
-            'totalOperasionalBulanIni',
             'totalPengeluaranBulanIni',
-            'sisaLabaRugiBersih',
-            'totalWargaMenunggak',
-            'totalNominalTunggakan',
+            'sisaKasBulanIni',
+            'penarikanMenunggu',
+            'gajiBelumBayar',
             'transaksiTerbaru',
-            'operasionalTerbaru'
+            'grafikBulan',
+            'grafikMasuk',
+            'grafikKeluar'
         ));
     }
 }

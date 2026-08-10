@@ -3,222 +3,99 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Warga;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\SetoranSampah;
+use App\Models\PenjualanSampah;
+use App\Models\PenarikanSaldo;
+use App\Models\Penggajian;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $now = Carbon::now();
+        $bulanIni = now()->month;
+        $tahunIni = now()->year;
 
-        // =========================================================
-        // 1. MODUL 2: METRIK WARGA // 1. MODUL 2: METRIK PELANGGAN & STATUS (TABEL: warga & users) STATUS (TABEL: warga & users)
-        // =========================================================
-        $totalWarga = Warga::count();
+        // Metrik utama
+        $totalNasabah = Warga::count();
+        $totalSaldoTabungan = (float) Warga::sum('saldo_tabungan');
 
-        // Warga Aktif (Di mana user terhubung & status user = 'aktif')
-        $wargaAktif = Warga::whereHas('user', function ($q) {
-            $q->where('status', 'aktif');
-        })->count();
+        $totalKgBulanIni = (float) SetoranSampah::whereMonth('tanggal_setoran', $bulanIni)
+            ->whereYear('tanggal_setoran', $tahunIni)
+            ->sum('berat_kg');
 
-        // Warga Menunggak = Warga yang memiliki tagihan iuran belum bayar
-        $wargaMenunggak = 0;
-        if (\Schema::hasTable('iuran')) {
-            $wargaMenunggak = DB::table('iuran')
-                ->where('status_pembayaran', 'Belum Bayar')
-                ->distinct()
-                ->count('warga_id');
-        }
+        $totalMasukBulanIni = (int) PenjualanSampah::whereMonth('tanggal_penjualan', $bulanIni)
+            ->whereYear('tanggal_penjualan', $tahunIni)
+            ->sum('total_harga');
 
-        // =========================================================
-        // 2. MODUL 5: KEUANGAN - PENDAPATAN IURAN (TABEL: iuran)
-        // =========================================================
-        $totalPendapatanIuran = 0;
-        if (\Schema::hasTable('iuran')) {
-            $totalPendapatanIuran = DB::table('iuran')
-                ->whereYear('tanggal_bayar', $now->year)
-                ->whereMonth('tanggal_bayar', $now->month)
-                ->where('status_pembayaran', 'Lunas')
-                ->sum('jumlah_tagihan');
-        }
+        $totalBelanjaBulanIni = (int) SetoranSampah::whereMonth('tanggal_setoran', $bulanIni)
+            ->whereYear('tanggal_setoran', $tahunIni)
+            ->sum('total_bayar');
 
-        // =========================================================
-        // 3. MODUL 7: BIAYA OPERASIONAL (TABEL: pengeluaran_operasional)
-        // =========================================================
-        $totalBiayaOperasional = 0;
-        if (\Schema::hasTable('pengeluaran_operasional')) {
-            $totalBiayaOperasional = DB::table('pengeluaran_operasional')
-                ->whereYear('tanggal_pengeluaran', $now->year)
-                ->whereMonth('tanggal_pengeluaran', $now->month)
-                ->sum('jumlah_biaya');
-        }
+        $totalTarikBulanIni = (int) PenarikanSaldo::where('status', 'Ditarik')
+            ->whereMonth('tanggal_penarikan', $bulanIni)
+            ->whereYear('tanggal_penarikan', $tahunIni)
+            ->sum('nominal');
 
-        // =========================================================
-        // 4. MODUL 6: TOTAL GAJI PETUGAS (TABEL: penggajian)
-        // =========================================================
-        $totalGajiPetugas = 0;
-        if (\Schema::hasTable('penggajian')) {
-            $totalGajiPetugas = DB::table('penggajian')
-                ->where('bulan_gaji', $now->format('Y-m'))
-                ->sum('total_gaji_bersih');
-        }
+        $totalGajiBulanIni = (int) Penggajian::where('status_pembayaran', 'Dibayar')
+            ->whereMonth('created_at', $bulanIni)
+            ->whereYear('created_at', $tahunIni)
+            ->sum('total_gaji_bersih');
 
-        // =========================================================
-        // 5. MODUL 4: PENGELOLAAN VOLUME SAMPAH (TABEL: pengangkutan)
-        // =========================================================
-        $volumeSampahHariIni = 0;
-        $volumeSampahBulanIni = 0;
+        $totalKeluarBulanIni = $totalBelanjaBulanIni + $totalTarikBulanIni + $totalGajiBulanIni;
+        $labaBulanIni = $totalMasukBulanIni - $totalKeluarBulanIni;
 
-        if (\Schema::hasTable('pengangkutan')) {
-            // Hitung Hari Ini
-            $volumeSampahHariIni = DB::table('pengangkutan')
-                ->whereDate('tanggal_tugas', Carbon::today())
-                ->sum('volume_m3');
+        // Penjualan terbaru
+        $penjualanTerbaru = PenjualanSampah::with('jenisSampah')
+            ->latest('tanggal_penjualan')
+            ->take(6)
+            ->get();
 
-            // Hitung Bulan Ini
-            $volumeSampahBulanIni = DB::table('pengangkutan')
-                ->whereYear('tanggal_tugas', $now->year)
-                ->whereMonth('tanggal_tugas', $now->month)
-                ->sum('volume_m3');
-        }
+        $setoranTerbaru = SetoranSampah::with('warga.user', 'jenisSampah')
+            ->latest('tanggal_setoran')
+            ->take(6)
+            ->get();
 
-        // =========================================================
-        // 6. MODUL 1 & 3: KONDISI ARMADA & RUTE (TABEL: armada & rute)
-        // =========================================================
-        $kendaraanAktif = 0;
-        $kendaraanRusak = 0;
-
-        if (\Schema::hasTable('armada')) {
-            $kendaraanAktif = DB::table('armada')
-                ->where('status_kondisi', 'aktif')
-                ->count();
-
-            $kendaraanRusak = DB::table('armada')
-                ->where('status_kondisi', 'rusak')
-                ->count();
-        }
-
-        // Monitoring Rute Tugas Hari Ini (TABEL: rute)
-        $totalRuteHariIni = 0;
-
-        if (\Schema::hasTable('rute')) {
-            $totalRuteHariIni = DB::table('rute')->count();
-        }
-
-        // =========================================================
-        // 6b. PRODUKTIVITAS PETUGAS (MODUL 9)
-        // Tugas selesai vs total ditugaskan bulan ini, per petugas
-        // =========================================================
-        $produktivitasPetugas = collect();
-        if (\Schema::hasTable('pengangkutan') && \Schema::hasTable('users')) {
-            $produktivitasPetugas = DB::table('pengangkutan')
-                ->join('users', 'pengangkutan.petugas_id', '=', 'users.id')
-                ->select(
-                    'users.id as petugas_id',
-                    'users.name as nama_petugas',
-                    DB::raw('COUNT(*) as total_tugas'),
-                    DB::raw("SUM(CASE WHEN status_tugas = 'Selesai' THEN 1 ELSE 0 END) as tugas_selesai")
-                )
-                ->whereYear('tanggal_tugas', $now->year)
-                ->whereMonth('tanggal_tugas', $now->month)
-                ->groupBy('users.id', 'users.name')
-                ->orderByDesc('tugas_selesai')
-                ->get()
-                ->map(function ($item) {
-                    $item->persentase = $item->total_tugas > 0
-                        ? round(($item->tugas_selesai / $item->total_tugas) * 100, 1)
-                        : 0;
-                    return $item;
-                });
-        }
-
-        // Absensi / Petugas Hadir Hari Ini
-        $petugasHadir = 0;
-        if (\Schema::hasTable('absensi_petugas')) {
-            $petugasHadir = DB::table('absensi_petugas')
-                ->whereDate('tanggal', Carbon::today())
-                ->where('status', 'hadir')
-                ->distinct()
-                ->count('user_id');
-        }
-
-        // =========================================================
-        // 7. MODUL 11: PENGADUAN / KENDALA (TABEL: pengaduan)
-        // =========================================================
-        $pengaduanBaru = 0;
-        if (\Schema::hasTable('pengaduan')) {
-            $pengaduanBaru = DB::table('pengaduan')
-                ->where('status_respon', 'Belum Dikerjakan')
-                ->count();
-        }
-
-        // =========================================================
-        // 8. DATA GRAFIK 12 BULAN (MODUL 9)
-        // Grafik pembayaran, volume sampah, biaya operasional
-        // =========================================================
-        $grafikPembayaran = [];
-        $grafikVolume = [];
-        $grafikBiaya = [];
+        // Grafik 12 bulan
+        $grafikBulan = [];
+        $grafikMasuk = [];
+        $grafikKeluar = [];
 
         for ($i = 11; $i >= 0; $i--) {
-            $bulanDate = Carbon::now()->subMonths($i);
-            $bulanLabel = $bulanDate->format('M Y');
+            $bulanDate = now()->subMonths($i);
 
-            $pembayaran = 0;
-            if (\Schema::hasTable('iuran')) {
-                $pembayaran = DB::table('iuran')
-                    ->whereYear('tanggal_bayar', $bulanDate->year)
-                    ->whereMonth('tanggal_bayar', $bulanDate->month)
-                    ->where('status_pembayaran', 'Lunas')
-                    ->sum('jumlah_tagihan');
-            }
-
-            $volume = 0;
-            if (\Schema::hasTable('pengangkutan')) {
-                $volume = DB::table('pengangkutan')
-                    ->whereYear('tanggal_tugas', $bulanDate->year)
-                    ->whereMonth('tanggal_tugas', $bulanDate->month)
-                    ->sum('volume_m3');
-            }
-
-            $biaya = 0;
-            if (\Schema::hasTable('pengeluaran_operasional')) {
-                $biaya = DB::table('pengeluaran_operasional')
-                    ->whereYear('tanggal_pengeluaran', $bulanDate->year)
-                    ->whereMonth('tanggal_pengeluaran', $bulanDate->month)
-                    ->sum('jumlah_biaya');
-            }
-
-            $grafikPembayaran[] = ['bulan' => $bulanLabel, 'total' => (float) $pembayaran];
-            $grafikVolume[] = ['bulan' => $bulanLabel, 'total' => (float) $volume];
-            $grafikBiaya[] = ['bulan' => $bulanLabel, 'total' => (float) $biaya];
+            $grafikBulan[] = $bulanDate->format('M Y');
+            $grafikMasuk[] = (int) PenjualanSampah::whereYear('tanggal_penjualan', $bulanDate->year)
+                ->whereMonth('tanggal_penjualan', $bulanDate->month)
+                ->sum('total_harga');
+            $grafikKeluar[] = (int) SetoranSampah::whereYear('tanggal_setoran', $bulanDate->year)
+                ->whereMonth('tanggal_setoran', $bulanDate->month)
+                ->sum('total_bayar')
+                + (int) PenarikanSaldo::where('status', 'Ditarik')
+                    ->whereYear('tanggal_penarikan', $bulanDate->year)
+                    ->whereMonth('tanggal_penarikan', $bulanDate->month)
+                    ->sum('nominal')
+                + (int) Penggajian::where('status_pembayaran', 'Dibayar')
+                    ->whereYear('created_at', $bulanDate->year)
+                    ->whereMonth('created_at', $bulanDate->month)
+                    ->sum('total_gaji_bersih');
         }
 
-        // =========================================================
-        // KIRIM DATA KE VIEW DASHBOARD MANAGER
-        // =========================================================
         return view('owner.dashboard', compact(
-            'totalWarga',
-            'wargaAktif',
-            'wargaMenunggak',
-            'totalPendapatanIuran',
-            'totalBiayaOperasional',
-            'totalGajiPetugas',
-            'volumeSampahHariIni',
-            'volumeSampahBulanIni',
-            'kendaraanAktif',
-            'kendaraanRusak',
-            'totalRuteHariIni',
-            'petugasHadir',
-            'pengaduanBaru',
-            'produktivitasPetugas',
-            'grafikPembayaran',
-            'grafikVolume',
-            'grafikBiaya'
+            'totalNasabah',
+            'totalSaldoTabungan',
+            'totalKgBulanIni',
+            'totalMasukBulanIni',
+            'totalKeluarBulanIni',
+            'totalBelanjaBulanIni',
+            'totalTarikBulanIni',
+            'totalGajiBulanIni',
+            'labaBulanIni',
+            'penjualanTerbaru',
+            'setoranTerbaru',
+            'grafikBulan',
+            'grafikMasuk',
+            'grafikKeluar'
         ));
     }
 }

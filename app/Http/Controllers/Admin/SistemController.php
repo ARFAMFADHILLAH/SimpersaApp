@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Iuran;
-use Illuminate\Support\Facades\Log;
+use App\Models\Warga;
+use App\Models\JenisSampah;
 
 class SistemController extends Controller
 {
     public function index()
     {
-        // Hitung jumlah tagihan yang belum dibayar untuk informasi di panel
-        $totalTunggakan = Iuran::where('status_pembayaran', 'Belum Bayar')->count();
-        return view('admin.sistem.index', compact('totalTunggakan'));
+        $totalWarga = Warga::count();
+        $totalJenis = JenisSampah::count();
+        return view('admin.sistem.index', compact('totalWarga', 'totalJenis'));
     }
 
     // Modul 13: Simulasi Blasting Notifikasi Pengingat Tagihan

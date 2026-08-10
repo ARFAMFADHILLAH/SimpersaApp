@@ -56,36 +56,6 @@
                             <x-input-error :messages="$errors->get('no_hp')" class="mt-1" />
                         </div>
 
-                        <!-- Wilayah Pelayanan -->
-                        <div>
-                            <x-input-label for="wilayah_pelayanan_id" value="Wilayah Pelayanan *" />
-                            <select id="wilayah_pelayanan_id" name="wilayah_pelayanan_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
-                                <option value="">-- Pilih Wilayah Pelayanan --</option>
-                                @foreach($wilayahList as $wilayah)
-                                    <option value="{{ $wilayah->id }}" 
-                                        {{ old('wilayah_pelayanan_id', $warga->wilayah_pelayanan_id) == $wilayah->id ? 'selected' : '' }}>
-                                        {{ $wilayah->nama_wilayah }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('wilayah_pelayanan_id')" class="mt-1" />
-                        </div>
-
-                        <!-- Rute -->
-                        <div>
-                            <x-input-label for="rute_id" value="Rute *" />
-                            <select id="rute_id" name="rute_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" required>
-                                <option value="">-- Pilih Rute --</option>
-                                @foreach(\App\Models\Rute::all() as $rute)
-                                    <option value="{{ $rute->id }}"
-                                        {{ old('rute_id', $warga->rute_id) == $rute->id ? 'selected' : '' }}>
-                                        {{ $rute->nama_rute }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('rute_id')" class="mt-1" />
-                        </div>
-
                         <!-- Status User -->
                         <div>
                             <x-input-label for="status" value="Status Akun *" />

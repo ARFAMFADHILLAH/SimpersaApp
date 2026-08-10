@@ -3,34 +3,27 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Warga;
-use App\Models\User;
-use App\Models\Wilayah;
-use App\Models\Rute;
-use App\Models\Pengangkutan;
 use App\Models\Iuran;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Pengangkutan;
+use App\Models\User;
+use App\Models\Warga;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class WargaController extends Controller
 {
     public function index()
     {
-        // Load relasi user dan wilayahPelayanan
-        $dataWarga = Warga::with(['user', 'wilayahPelayanan'])->latest()->get();
-        
-        // Ambil semua data wilayah untuk isi dropdown di form registrasi
-        $wilayahs = Wilayah::all();
+        // Load relasi user
+        $dataWarga = Warga::with(['user'])->latest()->get();
 
-        return view('admin.warga.index', compact('dataWarga', 'wilayahs'));
+        return view('admin.warga.index', compact('dataWarga'));
     }
 
     public function create()
     {
-        $rutes = Rute::all();
-        $wilayah = Wilayah::all();
-        return view('admin.warga.create', compact('rutes', 'wilayah'));
+        return view('admin.warga.create');
     }
 
     public function show($id)
@@ -43,6 +36,7 @@ class WargaController extends Controller
         $riwayatPembayaran = Iuran::where('warga_id', $id)
             ->latest('bulan_tagihan')
             ->paginate(10);
+
         return view('admin.warga.show', compact('warga', 'riwayatPengangkutan', 'riwayatPembayaran'));
     }
 
@@ -50,43 +44,39 @@ class WargaController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'name'                 => 'required|string|max:255',
-            'email'                => 'required|string|email|max:255|unique:users,email',
-            'no_hp'                => 'required|string|max:20',
-            'wilayah_pelayanan_id' => 'required|exists:wilayah_pelayanan,id',
-            'rute_id'              => 'required|exists:rute,id',
-            'alamat_lengkap'       => 'required|string',
-            'latitude'             => 'nullable|string|max:255',
-            'longitude'            => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'no_hp' => 'required|string|max:20',
+            'alamat_lengkap' => 'required|string',
+            'latitude' => 'nullable|string|max:255',
+            'longitude' => 'nullable|string|max:255',
         ]);
 
         DB::transaction(function () use ($request) {
             // 2. Buat User Baru
             $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
+                'name' => $request->name,
+                'email' => $request->email,
                 'password' => Hash::make('password123'),
-                'role_id'  => DB::table('roles')->where('name', 'warga')->value('id'),
-                'status'   => 'aktif',
+                'role_id' => DB::table('roles')->where('name', 'warga')->value('id'),
+                'status' => 'aktif',
             ]);
 
             // 3. Generate No Warga (Format: WRG-YYYYMM-0001)
             $bulanTahun = date('Ym');
             $countWarga = Warga::whereYear('created_at', date('Y'))
-                                       ->whereMonth('created_at', date('m'))
-                                       ->count() + 1;
-            $noWarga = 'WRG-' . $bulanTahun . '-' . str_pad($countWarga, 4, '0', STR_PAD_LEFT);
+                ->whereMonth('created_at', date('m'))
+                ->count() + 1;
+            $noWarga = 'WRG-'.$bulanTahun.'-'.str_pad($countWarga, 4, '0', STR_PAD_LEFT);
 
             // 4. Simpan Data Warga
             Warga::create([
-                'user_id'              => $user->id,
-                'no_warga'         => $noWarga,
-                'no_hp'                => $request->no_hp,
-                'rute_id'              => $request->rute_id,
-                'wilayah_pelayanan_id' => $request->wilayah_pelayanan_id,
-                'alamat_lengkap'       => $request->alamat_lengkap,
-                'latitude'             => $request->latitude,
-                'longitude'            => $request->longitude,
+                'user_id' => $user->id,
+                'no_warga' => $noWarga,
+                'no_hp' => $request->no_hp,
+                'alamat_lengkap' => $request->alamat_lengkap,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
             ]);
         });
 
@@ -98,13 +88,10 @@ class WargaController extends Controller
      */
     public function edit($id)
     {
-        // Ambil data warga beserta relasi user dan wilayah
+        // Ambil data warga beserta relasi user
         $warga = Warga::with('user')->findOrFail($id);
-        
-        // Ambil semua daftar wilayah untuk dropdown edit
-        $wilayahList = Wilayah::orderBy('nama_wilayah','asc')->get();
 
-        return view('admin.warga.edit', compact('warga', 'wilayahList'));
+        return view('admin.warga.edit', compact('warga'));
     }
 
     /**
@@ -116,23 +103,21 @@ class WargaController extends Controller
 
         // Validation
         $request->validate([
-            'name'                 => 'required|string|max:255',
-            'email'                => 'required|email|unique:users,email,' . $warga->user_id,
-            'no_hp'                => 'required|string|max:20',
-            'wilayah_pelayanan_id' => 'required|exists:wilayah_pelayanan,id',
-            'rute_id'              => 'required|exists:rute,id',
-            'alamat_lengkap'       => 'required|string',
-            'latitude'             => 'nullable|numeric',
-            'longitude'            => 'nullable|numeric',
-            'status'               => 'required|in:aktif,nonaktif',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$warga->user_id,
+            'no_hp' => 'required|string|max:20',
+            'alamat_lengkap' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         // Transaction
         DB::transaction(function () use ($request, $warga) {
             // 1. Update data User
             $warga->user->update([
-                'name'   => $request->name,
-                'email'  => $request->email,
+                'name' => $request->name,
+                'email' => $request->email,
                 'status' => $request->status,
             ]);
 
@@ -145,17 +130,15 @@ class WargaController extends Controller
 
             // 2. Update data Warga
             $warga->update([
-                'no_hp'                => $request->no_hp,
-                'rute_id'              => $request->rute_id,
-                'wilayah_pelayanan_id' => $request->wilayah_pelayanan_id,
-                'alamat_lengkap'       => $request->alamat_lengkap,
-                'latitude'             => $request->latitude,
-                'longitude'            => $request->longitude,
+                'no_hp' => $request->no_hp,
+                'alamat_lengkap' => $request->alamat_lengkap,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
             ]);
         });
 
         return redirect()->route('admin.warga.index')
-                         ->with('success', 'Data warga berhasil diperbarui!');
+            ->with('success', 'Data warga berhasil diperbarui!');
     }
 
     public function destroy($id)

@@ -4,22 +4,25 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisSampah;
+use App\Models\KategoriSampah;
 use Illuminate\Http\Request;
 
 class JenisSampahController extends Controller
 {
     public function index()
     {
-        $dataSampah = JenisSampah::latest()->get();
-        return view('admin.jenis_sampah.index', compact('dataSampah'));
+        $dataSampah = JenisSampah::with('kategoriSampah')->latest()->get();
+        $dataKategori = KategoriSampah::orderBy('nama_kategori')->get();
+        return view('admin.jenis_sampah.index', compact('dataSampah', 'dataKategori'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_jenis'         => 'required|string|max:255|unique:jenis_sampah_dan_tarif,nama_jenis',
+            'kategori_sampah_id' => 'required|exists:kategori_sampah,id',
             'tarif_per_kg'       => 'required|numeric|min:0',
-            'tarif_bulanan_flat' => 'required|numeric|min:0',
+            'tarif_jual_per_kg'  => 'required|numeric|min:0',
         ]);
 
         JenisSampah::create($validated);
@@ -34,8 +37,9 @@ class JenisSampahController extends Controller
 
         $validated = $request->validate([
             'nama_jenis'         => 'required|string|max:255|unique:jenis_sampah_dan_tarif,nama_jenis,' . $id,
+            'kategori_sampah_id' => 'required|exists:kategori_sampah,id',
             'tarif_per_kg'       => 'required|numeric|min:0',
-            'tarif_bulanan_flat' => 'required|numeric|min:0',
+            'tarif_jual_per_kg'  => 'required|numeric|min:0',
         ]);
 
         $jenisSampah->update($validated);
