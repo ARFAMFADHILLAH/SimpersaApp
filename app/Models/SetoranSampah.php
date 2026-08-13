@@ -10,7 +10,6 @@ class SetoranSampah extends Model
 
     protected $fillable = [
         'warga_id',
-        'mitra_id',
         'jenis_sampah_id',
         'berat_kg',
         'harga_per_kg',
@@ -29,11 +28,6 @@ class SetoranSampah extends Model
     public function warga()
     {
         return $this->belongsTo(Warga::class, 'warga_id');
-    }
-
-    public function mitra()
-    {
-        return $this->belongsTo(Mitra::class, 'mitra_id');
     }
 
     public function jenisSampah()

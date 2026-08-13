@@ -30,10 +30,6 @@
                                 <textarea name="alamat_lengkap" id="alamat_lengkap" rows="3" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm">{{ old('alamat_lengkap') }}</textarea>
                                 @error('alamat_lengkap') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Lokasi Rumah Warga</label>
-                                <x-lokasi-picker map-id="mapWargaBaru" address-input-id="alamat_lengkap" hint="Klik pada peta untuk menandai lokasi rumah, atau ketik alamat lalu tekan &quot;Cari dari Alamat&quot;." />
-                            </div>
                             <p class="text-xs text-gray-500">Password default: <code class="bg-gray-100 px-1 rounded">password123</code></p>
                         </div>
                         <div class="mt-6 flex gap-3">

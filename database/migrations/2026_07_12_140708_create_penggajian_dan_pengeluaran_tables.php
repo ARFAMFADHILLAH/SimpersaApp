@@ -27,7 +27,6 @@ return new class extends Migration
     // 2. Tabel Pengeluaran Operasional (BBM, Servis, Alat)
     Schema::create('pengeluaran_operasional', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('armada_id')->nullable()->constrained('armada')->onDelete('set null');
         $table->date('tanggal_pengeluaran');
         $table->string('kategori_biaya'); // BBM, Servis, Pergantian Ban, Pembelian Alat
         $table->integer('jumlah_biaya');

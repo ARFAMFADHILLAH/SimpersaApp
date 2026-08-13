@@ -91,17 +91,16 @@ php artisan view:cache
 
 ```
 ├── app/
-│   ├── Console/Commands/        # command artisan (legacy: iuran:generate-tagihan, notifikasi:kirim-pengingat)
 │   ├── Http/Controllers/
 │   │   ├── Admin/               # master data, gaji, rekap kehadiran, backup
 │   │   ├── Owner/               # pantauan read-only
 │   │   ├── Bendahara/           # tabungan, penggajian, laporan keuangan
 │   │   ├── Petugas_lapangan/    # kasir, absensi kamera, gaji
 │   │   └── Auth/                # autentikasi
-│   ├── Models/                  # 27 model
+│   ├── Models/                  # 13 model
 │   └── Providers/
 ├── database/
-│   ├── migrations/              # 42 migrasi
+│   ├── migrations/              # 23 migrasi
 │   └── seeders/                 # 5 peran + 6 akun demo
 ├── resources/views/            # view per area + components (sidebar, bottom-nav, camera-capture, lokasi-picker)
 ├── routes/
@@ -132,7 +131,8 @@ php vendor/bin/pint # format kode (PSR-12)
 
 - **Absensi**: foto wajah wajib dikirim saat clock-in maupun clock-out (validasi `required|image|jpeg,png,jpg|max:2048`); foto disimpan di `storage/app/public/absensi` dan dapat dilihat pada riwayat petugas.
 - **Penggajian**: parameter di halaman admin `/admin/gaji/pengaturan` cukup **Gaji Pokok**; bonus/insentif diinput Bendahara per baris saat pembayaran; kolom `pengaturan_gaji` lama (insentif/bonus/potongan) tidak lagi dipakai perhitungan.
-- Dua command artisan terjadwal lama (`iuran:generate-tagihan`, `notifikasi:kirim-pengingat`) masih tersedia namun modul-modul lama (rute, pengangkutan, DSS, TPS, iuran otomatis, profil mitra) tidak lagi terpasang di rute/menu aplikasi.
+- **Laporan keuangan**: pemasukan dihitung dari **penjualan sampah ke pengepul** (`penjualan_sampah`), pengeluaran dari gaji dibayar (`penggajian`) dan operasional (`pengeluaran_operasional`).
+- Modul-modul lama (iuran, rute, pengangkutan, armada, DSS, TPS, pengaduan, mitra) telah dihapus dari basis data, kode, dan menu aplikasi.
 
 ---
 

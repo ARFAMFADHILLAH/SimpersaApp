@@ -63,7 +63,7 @@
     <table>
         <tr><th colspan="2" style="text-align:center;">ARUS KAS SEDERHANA</th></tr>
         <tr>
-            <td class="bold">Kas Masuk (Penerimaan Iuran)</td>
+            <td class="bold">Kas Masuk (Penerimaan Penjualan Sampah)</td>
             <td class="text-right">Rp {{ number_format($pemasukanBulanIni, 0, ',', '.') }}</td>
         </tr>
         <tr>

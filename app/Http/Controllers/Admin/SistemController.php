@@ -16,40 +16,6 @@ class SistemController extends Controller
         return view('admin.sistem.index', compact('totalWarga', 'totalJenis'));
     }
 
-    // Modul 13: Simulasi Blasting Notifikasi Pengingat Tagihan
-    public function kirimPengingat(Request $request)
-    {
-        $tunggakan = Iuran::with('warga.user')
-            ->where('status_pembayaran', 'Belum Bayar')
-            ->get();
-
-        $terkirim = 0;
-        foreach ($tunggakan as $iur) {
-            $nama = $iur->warga->user->name;
-            $nomor = $iur->warga->no_warga;
-            $bulan = $iur->bulan_tagihan;
-            $nominal = number_format($iur->jumlah_tagihan, 0, ',', '.');
-
-            // Konten Pesan Pengingat
-            $pesan = "Halo $nama (No: $nomor), iuran sampah Anda untuk periode $bulan sebesar Rp $nominal belum terbayar. Mohon segera melakukan pelunasan. Terima kasih.";
-
-            // 1. Simpan ke file log lokal (storage/logs/laravel.log) sebagai bukti simulasi
-            Log::info("WA/Email BLAST ke Warga: " . $pesan);
-
-            // 2. Opsi Integrasi WhatsApp API (Fonnte / Jasa WA Gateway Lainnya)
-            /*
-            Http::withHeaders(['Authorization' => 'TOKEN_ANDA'])->post('https://api.fonnte.com/send', [
-                'target' => $iur->warga->user->phone_number, // pastikan ada kolom nomor hp
-                'message' => $pesan,
-            ]);
-            */
-
-            $terkirim++;
-        }
-
-        return redirect()->route('admin.sistem.index')->with('success', "Berhasil menyiarkan $terkirim notifikasi pengingat iuran ke sistem log!");
-    }
-
     // Modul 14: Fitur Backup Database Instan via Dashboard
     public function backupDatabase()
     {

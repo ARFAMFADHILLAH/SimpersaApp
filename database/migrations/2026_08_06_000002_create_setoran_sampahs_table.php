@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('setoran_sampahs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('warga_id')->constrained('warga')->cascadeOnDelete();
-            $table->foreignId('mitra_id')->nullable()->constrained('mitras')->nullOnDelete();
             $table->foreignId('jenis_sampah_id')->constrained('jenis_sampah_dan_tarif')->cascadeOnDelete();
             $table->decimal('berat_kg', 8, 2);
             $table->decimal('harga_per_kg', 10, 2);

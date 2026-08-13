@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Iuran;
-use App\Models\Pengangkutan;
 use App\Models\User;
 use App\Models\Warga;
 use Illuminate\Http\Request;
@@ -28,16 +26,9 @@ class WargaController extends Controller
 
     public function show($id)
     {
-        $warga = Warga::with('user', 'rute', 'wilayah')->findOrFail($id);
-        $riwayatPengangkutan = Pengangkutan::where('warga_id', $id)
-            ->with('armada', 'jenisSampah')
-            ->latest('tanggal_tugas')
-            ->paginate(10);
-        $riwayatPembayaran = Iuran::where('warga_id', $id)
-            ->latest('bulan_tagihan')
-            ->paginate(10);
+        $warga = Warga::with('user')->findOrFail($id);
 
-        return view('admin.warga.show', compact('warga', 'riwayatPengangkutan', 'riwayatPembayaran'));
+        return view('admin.warga.show', compact('warga'));
     }
 
     public function store(Request $request)
@@ -48,8 +39,6 @@ class WargaController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'no_hp' => 'required|string|max:20',
             'alamat_lengkap' => 'required|string',
-            'latitude' => 'nullable|string|max:255',
-            'longitude' => 'nullable|string|max:255',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -75,8 +64,6 @@ class WargaController extends Controller
                 'no_warga' => $noWarga,
                 'no_hp' => $request->no_hp,
                 'alamat_lengkap' => $request->alamat_lengkap,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
             ]);
         });
 
@@ -107,8 +94,6 @@ class WargaController extends Controller
             'email' => 'required|email|unique:users,email,'.$warga->user_id,
             'no_hp' => 'required|string|max:20',
             'alamat_lengkap' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
@@ -132,8 +117,6 @@ class WargaController extends Controller
             $warga->update([
                 'no_hp' => $request->no_hp,
                 'alamat_lengkap' => $request->alamat_lengkap,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
             ]);
         });
 

@@ -42,11 +42,6 @@
                         <x-input-error :messages="$errors->get('alamat_lengkap')" class="mt-1" />
                     </div>
 
-                    <!-- PETA & KOORDINAT LOKASI (otomatis dari alamat lengkap / klik peta / lokasi saya) -->
-                    <div class="border-t pt-4 mt-2">
-                        <x-lokasi-picker map-id="mapWargaIndex" address-input-id="alamat_lengkap" hint="Titik koordinat otomatis muncul dari alamat lengkap yang diisi, dari klik pada peta, atau dari lokasi Anda." />
-                    </div>
-
                     <div class="flex items-center gap-4 pt-2">
                         <x-primary-button class="bg-indigo-600 hover:bg-indigo-700">
                             {{ __('Daftarkan Warga') }}
@@ -67,7 +62,6 @@
                                 <th class="p-3">Nama</th>
                                 <th class="p-3">Kontak / Email</th>
                                 <th class="p-3">Alamat</th>
-                                <th class="p-3">Koordinat GPS</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
@@ -84,15 +78,6 @@
                                     
                                     <td class="p-3 text-xs text-gray-600 max-w-xs truncate">
                                         {{ $plg->alamat_lengkap }}
-                                    </td>
-                                    <td class="p-3 text-xs font-mono">
-                                        @if($plg->latitude && $plg->longitude)
-                                            <a href="https://www.google.com/maps?q={{ $plg->latitude }},{{ $plg->longitude }}" target="_blank" class="inline-flex items-center gap-1 text-indigo-600 hover:underline">
-                                                🗺️ Lihat Maps
-                                            </a>
-                                        @else
-                                            <span class="text-gray-400 border border-dashed border-gray-300 px-1.5 py-0.5 rounded">Belum Set</span>
-                                        @endif
                                     </td>
                                     <td class="p-3">
                                         <span class="px-2.5 py-1 text-[11px] font-semibold rounded-full {{ ($plg->user->status ?? 'aktif') === 'aktif' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
@@ -114,7 +99,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="p-6 text-center text-gray-400">Belum ada data warga yang terdaftar.</td>
+                                    <td colspan="6" class="p-6 text-center text-gray-400">Belum ada data warga yang terdaftar.</td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -49,11 +49,4 @@
             </button>
         </div>
     </form>
-
-    <div class="text-center mt-6 pt-5 border-t border-gray-100">
-        <p class="text-sm text-gray-500">
-            Belum punya akun?
-            <a href="{{ route('register') }}" class="font-semibold text-emerald-700 hover:text-emerald-800 underline">Daftar di sini</a>
-        </p>
-    </div>
 </x-guest-layout>

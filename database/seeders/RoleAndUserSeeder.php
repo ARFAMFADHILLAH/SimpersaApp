@@ -114,61 +114,19 @@ class RoleAndUserSeeder extends Seeder
         );
         $wargaUserId = DB::table('users')->where('email', 'warga@sistemsampah.com')->value('id');
 
-        // 8. Seed Data Wilayah Pelayanan
-        $wilayahId = DB::table('wilayah_pelayanan')->value('id');
-        if (!$wilayahId) {
-            DB::table('wilayah_pelayanan')->insert([
-                ['nama_wilayah' => 'Wilayah Pusat Kota', 'cakupan_area' => 'Kecamatan Pusat Kota', 'created_at' => now(), 'updated_at' => now()],
-                ['nama_wilayah' => 'Wilayah Timur', 'cakupan_area' => 'Kecamatan Timur', 'created_at' => now(), 'updated_at' => now()],
-                ['nama_wilayah' => 'Wilayah Barat', 'cakupan_area' => 'Kecamatan Barat', 'created_at' => now(), 'updated_at' => now()],
-            ]);
-            $wilayahId = DB::table('wilayah_pelayanan')->value('id');
-        }
-
-        // 9. Seed Data Rute
-        $ruteId = DB::table('rute')->value('id');
-        if (!$ruteId) {
-            DB::table('rute')->insert([
-                ['nama_rute' => 'Rute A - Perumahan Indah', 'hari_angkut' => 'Senin & Kamis', 'keterangan' => 'Perumahan Indah dan sekitarnya', 'created_at' => now(), 'updated_at' => now()],
-                ['nama_rute' => 'Rute B - Pasar & Komersil', 'hari_angkut' => 'Selasa & Jumat', 'keterangan' => 'Area pasar dan pertokoan', 'created_at' => now(), 'updated_at' => now()],
-                ['nama_rute' => 'Rute C - Perumahan Baru', 'hari_angkut' => 'Rabu & Sabtu', 'keterangan' => 'Perumahan Baru dan sekitarnya', 'created_at' => now(), 'updated_at' => now()],
-            ]);
-            $ruteId = DB::table('rute')->value('id');
-        }
-
-        // 10. Profil Warga (data di tabel warga)
+        // 8. Profil Warga (data di tabel warga)
         if ($wargaUserId && !DB::table('warga')->where('user_id', $wargaUserId)->exists()) {
             DB::table('warga')->insert([
                 'user_id' => $wargaUserId,
                 'no_warga' => 'WRG-' . date('Ymd') . '-001',
                 'no_hp' => '081234567890',
                 'alamat_lengkap' => 'Jl. Contoh No. 123, RT 01/02',
-                'rute_id' => $ruteId,
-                'wilayah_pelayanan_id' => $wilayahId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
-        // 11. Profil Mitra (Bank Sampah) - pemilik tunggal, tanpa login
-        if (!DB::table('mitras')->exists()) {
-            DB::table('mitras')->insert([
-                'nama_mitra' => 'KISUCI',
-                'no_hp' => '081234567890',
-                'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            DB::table('mitras')->where('id', DB::table('mitras')->orderBy('id')->value('id'))
-                ->update([
-                    'nama_mitra' => 'KISUCI',
-                    'alamat_kontak' => 'Komunitas Iklim Sungai Cikeas',
-                    'updated_at' => now(),
-                ]);
-        }
-
-        // 12. Seed Data Kategori Sampah (POS Bank Sampah)
+        // 9. Seed Data Kategori Sampah (POS Bank Sampah)
         if (!DB::table('kategori_sampah')->exists()) {
             DB::table('kategori_sampah')->insert([
                 ['nama_kategori' => 'Organik', 'keterangan' => 'Sampah sisa organik rumah tangga', 'created_at' => now(), 'updated_at' => now()],
@@ -177,7 +135,7 @@ class RoleAndUserSeeder extends Seeder
             ]);
         }
 
-        // 13. Seed Data Jenis Sampah & Tarif (Harga Beli = bayar ke warga, Harga Jual = jual ke pengepul)
+        // 10. Seed Data Jenis Sampah & Tarif (Harga Beli = bayar ke warga, Harga Jual = jual ke pengepul)
         if (!DB::table('jenis_sampah_dan_tarif')->exists()) {
             $kategoriIds = DB::table('kategori_sampah')->pluck('id', 'nama_kategori');
             DB::table('jenis_sampah_dan_tarif')->insert([
@@ -192,7 +150,7 @@ class RoleAndUserSeeder extends Seeder
             ]);
         }
 
-        // 14. Seed Data Pengaturan Gaji (Standar Gaji Pokok Petugas)
+        // 11. Seed Data Pengaturan Gaji (Standar Gaji Pokok Petugas)
         if (!DB::table('pengaturan_gaji')->exists()) {
             DB::table('pengaturan_gaji')->insert([
                 'gaji_pokok' => 2000000,

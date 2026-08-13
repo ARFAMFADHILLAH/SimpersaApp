@@ -99,7 +99,6 @@ class PetugasKasirFlowTest extends TestCase
 
         $setoran = SetoranSampah::create([
             'warga_id' => $warga->id,
-            'mitra_id' => null,
             'jenis_sampah_id' => $jenis->id,
             'berat_kg' => 3,
             'harga_per_kg' => 2000,
@@ -154,7 +153,7 @@ class PetugasKasirFlowTest extends TestCase
         $this->actingAs($petugas)->get(route('admin.dashboard'))->assertForbidden();
     }
 
-    public function test_form_admin_warga_tanpa_input_manual_koordinat(): void
+    public function test_form_admin_warga_tanpa_peta_dan_koordinat_gps(): void
     {
         $admin = User::factory()->create([
             'name' => 'Admin Utama',
@@ -166,15 +165,15 @@ class PetugasKasirFlowTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('admin.warga.index'));
         $response->assertOk();
-        $response->assertDontSee('Klik pada peta...');
-        $response->assertDontSee('onclick="getLocation()"');
-        $response->assertSee('mapWargaIndex');
+        $response->assertDontSee('mapWargaIndex');
+        $response->assertDontSee('Koordinat GPS');
+        $response->assertDontSee('pakai lokasi Anda', false);
+        $response->assertSee('Alamat Lengkap');
 
         $response = $this->actingAs($admin)->get(route('admin.warga.edit', $warga->id));
         $response->assertOk();
-        $response->assertDontSee('onclick="cariDariAlamat()"');
-        $response->assertDontSee('readonly');
-        $response->assertSee('mapWargaEdit');
+        $response->assertDontSee('mapWargaEdit');
+        $response->assertDontSee('Pakai Lokasi Saya');
     }
 
     public function test_aplikasi_menggunakan_timezone_indonesia(): void

@@ -128,8 +128,6 @@ class AllRolesPostTest extends TestCase
         $this->assertDatabaseHas('warga', [
             'user_id' => $user->id,
             'alamat_lengkap' => 'Jl. Melati No. 10, RT 03/05',
-            'wilayah_pelayanan_id' => null,
-            'rute_id' => null,
         ]);
     }
 

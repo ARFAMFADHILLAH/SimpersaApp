@@ -81,11 +81,6 @@
                         <x-input-error :messages="$errors->get('alamat_lengkap')" class="mt-1" />
                     </div>
 
-                    <!-- PETA & KOORDINAT LOKASI (otomatis dari alamat lengkap / klik peta / lokasi saya) -->
-                    <div class="border-t pt-4 mt-2">
-                        <x-lokasi-picker map-id="mapWargaEdit" address-input-id="alamat_lengkap" :initial-lat="$warga->latitude" :initial-lng="$warga->longitude" hint="Klik peta untuk mengubah titik, cari dari alamat lengkap, atau pakai lokasi Anda." />
-                    </div>
-
                     <!-- Tombol Aksi -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t">
                         <a href="{{ route('admin.warga.index') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">

@@ -12,7 +12,7 @@
                 {{-- Ringkasan Keuangan Bulan Ini --}}
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <h4 class="text-sm text-gray-500 font-semibold mb-1">Total Pemasukan (Iuran)</h4>
+                        <h4 class="text-sm text-gray-500 font-semibold mb-1">Total Pemasukan (Penjualan Sampah)</h4>
                         <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalPemasukanBulanIni, 0, ',', '.') }}</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -31,42 +31,39 @@
                     </div>
                 </div>
 
-                {{-- Tabel Pemasukan Iuran --}}
+                {{-- Tabel Pemasukan Penjualan Sampah --}}
                 <div class="bg-white p-6 shadow-sm border border-gray-100 sm:rounded-lg">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Pemasukan Iuran Terbaru</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Pemasukan Penjualan Sampah Terbaru</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Warga</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pengepul</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis Sampah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Berat</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($pemasukanIuran as $iuran)
+                                @forelse($pemasukanPenjualan as $penjualan)
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ \Carbon\Carbon::parse($iuran->created_at)->format('d/m/Y') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $iuran->nama_warga ?? 'NN' }} <span class="text-xs text-gray-500 font-normal">({{ $iuran->no_warga ?? '-' }})</span></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">Rp {{ number_format($iuran->jumlah_tagihan, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                    {{ ($iuran->status_pembayaran ?? 'Belum Bayar') == 'Lunas' ? 'bg-green-100 text-green-800' : (($iuran->status_pembayaran ?? '') == 'Sedang Diproses' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700') }}">
-                                                {{ $iuran->status_pembayaran ?? 'Belum Bayar' }}
-                                            </span>
-                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ \Carbon\Carbon::parse($penjualan->tanggal_penjualan)->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $penjualan->nama_pengepul ?? '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $penjualan->nama_jenis ?? $penjualan->nama_kategori ?? '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ number_format($penjualan->berat_kg, 2, ',', '.') }} kg</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">Rp {{ number_format($penjualan->total_harga, 0, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data pemasukan.</td>
+                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data pemasukan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                     <div class="mt-4">
-                        {{ $pemasukanIuran->appends(['pengeluaran_page' => request('pengeluaran_page'), 'gaji_page' => request('gaji_page')])->links() }}
+                        {{ $pemasukanPenjualan->appends(['pengeluaran_page' => request('pengeluaran_page'), 'gaji_page' => request('gaji_page')])->links() }}
                     </div>
                 </div>
 

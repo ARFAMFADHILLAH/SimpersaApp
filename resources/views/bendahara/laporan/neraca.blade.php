@@ -49,12 +49,12 @@
                                 <td class="p-3 text-sm font-bold text-right text-gray-700">Rp {{ number_format($masukSampai, 0, ',', '.') }}</td>
                             </tr>
                             <tr class="border-b">
-                                <td class="p-3 pl-8 text-sm text-gray-700">Penerimaan Iuran (kumulatif s.d. periode)</td>
+                                <td class="p-3 pl-8 text-sm text-gray-700">Penerimaan Penjualan Sampah (kumulatif s.d. periode)</td>
                                 <td class="p-3 text-sm text-right text-gray-700">Rp {{ number_format($masukSampai, 0, ',', '.') }}</td>
                                 <td></td>
                             </tr>
                             <tr class="border-b">
-                                <td class="p-3 pl-8 text-sm text-gray-700">Penerimaan Iuran Periode Berjalan</td>
+                                <td class="p-3 pl-8 text-sm text-gray-700">Penerimaan Penjualan Sampah Periode Berjalan</td>
                                 <td class="p-3 text-sm text-right text-emerald-600 font-bold">Rp {{ number_format($masukBulanIni, 0, ',', '.') }}</td>
                                 <td></td>
                             </tr>

@@ -43,12 +43,6 @@
                         <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 bg-[#1b1b18] text-white text-sm font-medium rounded-md hover:bg-black transition">
                             Login
                         </a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-100 transition">
-                                Register
-                            </a>
-                        @endif
                     @endauth
                 @endif
             </nav>

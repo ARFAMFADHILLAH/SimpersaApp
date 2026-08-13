@@ -14,19 +14,18 @@ class ManagerKeuanganController extends Controller
         $bulanIni = Carbon::now()->month;
         $tahunIni = Carbon::now()->year;
 
-        // 1. Data Penerimaan Iuran (Pemasukan)
-        $pemasukanIuran = DB::table('iuran')
-            ->leftJoin('warga', 'iuran.warga_id', '=', 'warga.id')
-            ->leftJoin('users', 'warga.user_id', '=', 'users.id')
-            ->select('iuran.*', 'users.name as nama_warga', 'warga.no_warga')
-            ->latest('iuran.created_at')
+        // 1. Data Penerimaan Penjualan Sampah ke Pengepul (Pemasukan)
+        $pemasukanPenjualan = DB::table('penjualan_sampah')
+            ->leftJoin('kategori_sampah', 'penjualan_sampah.kategori_sampah_id', '=', 'kategori_sampah.id')
+            ->leftJoin('jenis_sampah_dan_tarif', 'penjualan_sampah.jenis_sampah_id', '=', 'jenis_sampah_dan_tarif.id')
+            ->select('penjualan_sampah.*', 'kategori_sampah.nama_kategori', 'jenis_sampah_dan_tarif.nama_jenis')
+            ->latest('penjualan_sampah.created_at')
             ->paginate(10, ['*'], 'pemasukan_page');
 
-        $totalPemasukanBulanIni = DB::table('iuran')
-            ->whereMonth('created_at', $bulanIni)
-            ->whereYear('created_at', $tahunIni)
-            ->whereIn('status_pembayaran', ['lunas', 'paid', 'Selesai', '1'])
-            ->sum('jumlah_tagihan');
+        $totalPemasukanBulanIni = DB::table('penjualan_sampah')
+            ->whereMonth('tanggal_penjualan', $bulanIni)
+            ->whereYear('tanggal_penjualan', $tahunIni)
+            ->sum('total_harga');
 
         // 2. Data Pengeluaran Operasional (Pengeluaran)
         $pengeluaranOperasional = DB::table('pengeluaran_operasional')
@@ -54,7 +53,7 @@ class ManagerKeuanganController extends Controller
         $saldoNetoBulanIni = $totalPemasukanBulanIni - ($totalPengeluaranBulanIni + $totalGajiBulanIni);
 
         return view('owner.keuangan.index', compact(
-            'pemasukanIuran',
+            'pemasukanPenjualan',
             'pengeluaranOperasional',
             'dataPenggajian',
             'totalPemasukanBulanIni',

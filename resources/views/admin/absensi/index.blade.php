@@ -42,6 +42,8 @@
                                         <th class="p-3 font-semibold text-gray-600">Tanggal</th>
                                         <th class="p-3 font-semibold text-gray-600">Jam Masuk</th>
                                         <th class="p-3 font-semibold text-gray-600">Jam Pulang</th>
+                                        <th class="p-3 font-semibold text-gray-600">Foto Masuk</th>
+                                        <th class="p-3 font-semibold text-gray-600">Foto Pulang</th>
                                         <th class="p-3 font-semibold text-gray-600">Status</th>
                                     </tr>
                                 </thead>
@@ -51,6 +53,24 @@
                                             <td class="p-3 text-gray-700">{{ date('d/m/Y', strtotime($absen->tanggal)) }}</td>
                                             <td class="p-3 text-gray-700">{{ $absen->jam_masuk ?? '-' }}</td>
                                             <td class="p-3 text-gray-700">{{ $absen->jam_pulang ?? '-' }}</td>
+                                            <td class="p-3 text-sm">
+                                                @if($absen->foto_masuk)
+                                                    <a href="{{ asset('storage/' . $absen->foto_masuk) }}" target="_blank">
+                                                        <img src="{{ asset('storage/' . $absen->foto_masuk) }}" alt="Foto masuk" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
+                                                    </a>
+                                                @else
+                                                    <span class="text-gray-400 text-xs">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="p-3 text-sm">
+                                                @if($absen->foto_pulang)
+                                                    <a href="{{ asset('storage/' . $absen->foto_pulang) }}" target="_blank">
+                                                        <img src="{{ asset('storage/' . $absen->foto_pulang) }}" alt="Foto pulang" class="w-10 h-10 object-cover rounded-lg border shadow-sm hover:scale-105 transition">
+                                                    </a>
+                                                @else
+                                                    <span class="text-gray-400 text-xs">-</span>
+                                                @endif
+                                            </td>
                                             <td class="p-3">
                                                 <span class="px-2 py-1 text-xs font-semibold rounded-full
                                                     {{ $absen->status == 'hadir' ? 'bg-green-100 text-green-800' : ($absen->status == 'izin' ? 'bg-blue-100 text-blue-800' : ($absen->status == 'sakit' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')) }}">
@@ -60,7 +80,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="p-4 text-center text-gray-500">Belum ada data absensi pada bulan ini.</td>
+                                            <td colspan="6" class="p-4 text-center text-gray-500">Belum ada data absensi pada bulan ini.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

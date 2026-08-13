@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Iuran;
 use App\Models\Penggajian;
 use App\Models\Pengeluaran;
+use App\Models\PenjualanSampah;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -15,10 +15,9 @@ class BendaharaLaporanController extends Controller
         $tahun = $request->get('tahun', Carbon::now()->year);
         $bulan = $request->get('bulan', Carbon::now()->format('Y-m'));
 
-        $pemasukanBulanIni = Iuran::where('status_pembayaran', 'Lunas')
-            ->whereYear('tanggal_bayar', substr($bulan, 0, 4))
-            ->whereMonth('tanggal_bayar', substr($bulan, 5, 2))
-            ->sum('jumlah_tagihan');
+        $pemasukanBulanIni = PenjualanSampah::whereYear('tanggal_penjualan', substr($bulan, 0, 4))
+            ->whereMonth('tanggal_penjualan', substr($bulan, 5, 2))
+            ->sum('total_harga');
 
         $pengeluaranGaji = Penggajian::where('status_pembayaran', 'Dibayar')
             ->where('bulan_gaji', $bulan)
@@ -31,19 +30,15 @@ class BendaharaLaporanController extends Controller
         $totalPengeluaran = $pengeluaranGaji + $pengeluaranOperasional;
         $labaRugi = $pemasukanBulanIni - $totalPengeluaran;
 
-        $riwayatTransaksi = collect();
-
-        $iuranLunas = Iuran::with('warga.user')
-            ->where('status_pembayaran', 'Lunas')
-            ->whereYear('tanggal_bayar', substr($bulan, 0, 4))
-            ->whereMonth('tanggal_bayar', substr($bulan, 5, 2))
+        $penjualanMasuk = PenjualanSampah::whereYear('tanggal_penjualan', substr($bulan, 0, 4))
+            ->whereMonth('tanggal_penjualan', substr($bulan, 5, 2))
             ->get()
             ->map(function ($item) {
                 return (object) [
-                    'tanggal' => $item->tanggal_bayar,
-                    'keterangan' => 'Iuran: ' . ($item->warga->user->name ?? 'Warga') . ' (' . $item->bulan_tagihan . ')',
+                    'tanggal' => $item->tanggal_penjualan,
+                    'keterangan' => 'Penjualan: ' . ($item->nama_pengepul ?: 'Pengepul') . ' (' . $item->berat_kg . ' kg)',
                     'kategori' => 'Pemasukan',
-                    'jumlah' => $item->jumlah_tagihan + $item->denda,
+                    'jumlah' => $item->total_harga,
                 ];
             });
 
@@ -72,7 +67,7 @@ class BendaharaLaporanController extends Controller
                 ];
             });
 
-        $riwayatTransaksi = $iuranLunas->concat($gajiDibayar)->concat($pengeluaranBulan)
+        $riwayatTransaksi = $penjualanMasuk->concat($gajiDibayar)->concat($pengeluaranBulan)
             ->sortByDesc('tanggal')
             ->values();
 
@@ -95,10 +90,9 @@ class BendaharaLaporanController extends Controller
     {
         $bulan = $request->get('bulan', Carbon::now()->format('Y-m'));
 
-        $pemasukanBulanIni = Iuran::where('status_pembayaran', 'Lunas')
-            ->whereYear('tanggal_bayar', substr($bulan, 0, 4))
-            ->whereMonth('tanggal_bayar', substr($bulan, 5, 2))
-            ->sum('jumlah_tagihan');
+        $pemasukanBulanIni = PenjualanSampah::whereYear('tanggal_penjualan', substr($bulan, 0, 4))
+            ->whereMonth('tanggal_penjualan', substr($bulan, 5, 2))
+            ->sum('total_harga');
 
         $pengeluaranGaji = Penggajian::where('status_pembayaran', 'Dibayar')
             ->where('bulan_gaji', $bulan)
@@ -138,16 +132,14 @@ class BendaharaLaporanController extends Controller
         $bulan = $request->get('bulan', Carbon::now()->format('Y-m'));
 
         // Kas masuk kumulatif sampai akhir periode terpilih
-        $masukSampai = Iuran::where('status_pembayaran', 'Lunas')
-            ->where(function ($q) use ($bulan) {
-                $q->whereYear('tanggal_bayar', '<', substr($bulan, 0, 4))
-                    ->orWhere(function ($q2) use ($bulan) {
-                        $q2->whereYear('tanggal_bayar', substr($bulan, 0, 4))
-                            ->whereMonth('tanggal_bayar', '<=', substr($bulan, 5, 2));
-                    });
-            })
-            ->selectRaw('COALESCE(SUM(jumlah_tagihan),0) + COALESCE(SUM(denda),0) as total')
-            ->value('total');
+        $masukSampai = PenjualanSampah::where(function ($q) use ($bulan) {
+            $q->whereYear('tanggal_penjualan', '<', substr($bulan, 0, 4))
+                ->orWhere(function ($q2) use ($bulan) {
+                    $q2->whereYear('tanggal_penjualan', substr($bulan, 0, 4))
+                        ->whereMonth('tanggal_penjualan', '<=', substr($bulan, 5, 2));
+                });
+        })
+            ->sum('total_harga');
 
         // Kas keluar kumulatif sampai akhir periode terpilih
         $keluarSampai = Penggajian::where('status_pembayaran', 'Dibayar')
@@ -159,11 +151,9 @@ class BendaharaLaporanController extends Controller
         $saldoAwal = $masukSampai - $keluarSampai;
 
         // Kas masuk pada bulan terpilih
-        $masukBulanIni = Iuran::where('status_pembayaran', 'Lunas')
-            ->whereYear('tanggal_bayar', substr($bulan, 0, 4))
-            ->whereMonth('tanggal_bayar', substr($bulan, 5, 2))
-            ->selectRaw('COALESCE(SUM(jumlah_tagihan),0) + COALESCE(SUM(denda),0) as total')
-            ->value('total');
+        $masukBulanIni = PenjualanSampah::whereYear('tanggal_penjualan', substr($bulan, 0, 4))
+            ->whereMonth('tanggal_penjualan', substr($bulan, 5, 2))
+            ->sum('total_harga');
 
         $keluarGaji = Penggajian::where('status_pembayaran', 'Dibayar')
             ->where('bulan_gaji', $bulan)
@@ -205,11 +195,9 @@ class BendaharaLaporanController extends Controller
             $bulanStr = sprintf('%02d', $i);
             $bulanTagih = "{$tahun}-{$bulanStr}";
 
-            $masuk = Iuran::where('status_pembayaran', 'Lunas')
-                ->whereYear('tanggal_bayar', $tahun)
-                ->whereMonth('tanggal_bayar', $i)
-                ->selectRaw('COALESCE(SUM(jumlah_tagihan),0) + COALESCE(SUM(denda),0) as total')
-                ->value('total');
+            $masuk = PenjualanSampah::whereYear('tanggal_penjualan', $tahun)
+                ->whereMonth('tanggal_penjualan', $i)
+                ->sum('total_harga');
 
             $keluar = Penggajian::where('status_pembayaran', 'Dibayar')
                 ->where('bulan_gaji', $bulanTagih)
@@ -247,10 +235,9 @@ class BendaharaLaporanController extends Controller
         for ($i = 1; $i <= 12; $i++) {
             $bulanStr = sprintf('%02d', $i);
 
-            $totalPemasukan = Iuran::where('status_pembayaran', 'Lunas')
-                ->whereYear('tanggal_bayar', $tahun)
-                ->whereMonth('tanggal_bayar', $i)
-                ->sum('jumlah_tagihan');
+            $totalPemasukan = PenjualanSampah::whereYear('tanggal_penjualan', $tahun)
+                ->whereMonth('tanggal_penjualan', $i)
+                ->sum('total_harga');
 
             $totalGaji = Penggajian::where('status_pembayaran', 'Dibayar')
                 ->whereYear('created_at', $tahun)
