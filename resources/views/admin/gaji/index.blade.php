@@ -14,7 +14,7 @@
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-bold text-gray-900">⚙️ Pengaturan Parameter Penggajian</h3>
-                    <p class="text-sm text-gray-500">Atur gaji pokok petugas. Total gaji = Gaji Pokok + Bonus/Insentif (diinput Bendahara saat pembayaran). Potongan otomatis & insentif absensi tidak lagi dipakai dalam perhitungan.</p>
+                    <p class="text-sm text-gray-500">Atur gaji pokok petugas. Total gaji = Gaji Pokok + Bonus/Insentif (diinput Bendahara saat pembayaran).</p>
                 </div>
 
                 <form action="{{ route('admin.gaji.update-pengaturan') }}" method="POST" class="space-y-4">

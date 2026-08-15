@@ -11,6 +11,7 @@ use App\Models\SetoranSampah;
 use App\Models\PenjualanSampah;
 use App\Models\Penggajian;
 use App\Models\PenarikanSaldo;
+use App\Support\StokSampah;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -90,6 +91,9 @@ class DashboardController extends Controller
         $penarikanMenunggu = (int) PenarikanSaldo::where('status', 'Diproses')->count();
         $nominalPenarikanMenunggu = (int) PenarikanSaldo::where('status', 'Diproses')->sum('nominal');
 
+        // 9. Stok Sampah di Gudang
+        $totalStokSampah = StokSampah::total();
+
         return view('admin.dashboard', compact(
             'totalWarga', 'wargaAktif', 'totalSaldoTabungan', 'totalPetugas',
             'totalKategori', 'totalJenis',
@@ -98,7 +102,8 @@ class DashboardController extends Controller
             'gajiPokok', 'penggajianBulanIni',
             'setoranTerbaru', 'penjualanTerbaru',
             'grafikBulan', 'grafikBelanja', 'grafikJual',
-            'penarikanMenunggu', 'nominalPenarikanMenunggu'
+            'penarikanMenunggu', 'nominalPenarikanMenunggu',
+            'totalStokSampah'
         ));
     }
 }

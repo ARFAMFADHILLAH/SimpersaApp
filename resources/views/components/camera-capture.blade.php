@@ -25,9 +25,9 @@
                 <button type="button" @click="startCamera()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-md transition">
                     📷 Buka Kamera
                 </button>
-                <button type="button" @click="$refs.fileInput.click()" class="px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-md transition">
-                    📁 Pilih File
-                </button>
+                {{-- <button type="button" @click="$refs.fileInput.click()" class="px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-md transition">
+                     Pilih File
+                </button> --}}
             </div>
         </div>
     </template>

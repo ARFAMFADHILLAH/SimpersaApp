@@ -13,6 +13,7 @@ class PenjualanSampah extends Model
     protected $table = 'penjualan_sampah';
 
     protected $fillable = [
+        'kode_transaksi',
         'kategori_sampah_id',
         'jenis_sampah_id',
         'nama_pengepul',

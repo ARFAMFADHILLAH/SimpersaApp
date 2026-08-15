@@ -11,13 +11,16 @@
                 </div>
 
                 <div class="p-4 sm:p-6 bg-white shadow sm:rounded-lg">
-                    <form method="GET" action="{{ route('admin.absensi.index') }}" class="flex items-end gap-4">
+                    <form method="GET" action="{{ route('admin.absensi.index') }}" class="flex flex-wrap items-end gap-4">
                         <div>
                             <x-input-label for="bulan" value="Pilih Bulan" />
                             <x-text-input id="bulan" name="bulan" type="month" value="{{ $bulan }}" class="mt-1 block" />
                         </div>
-                        <x-primary-button class="bg-indigo-600 hover:bg-indigo-700">Tampilkan</x-primary-button>
+                        <x-primary-button class="bg-green-600 hover:bg-green-700 transition">Tampilkan</x-primary-button>
                     </form>
+                    @if(session('success'))
+                        <p class="mt-3 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{{ session('success') }}</p>
+                    @endif
                 </div>
 
                 @forelse($dataAbsensi as $item)
@@ -35,6 +38,33 @@
                             </div>
                         </div>
 
+                        <details class="mb-3">
+                            <summary class="cursor-pointer text-sm font-semibold text-green-700 hover:text-green-800">+ Tambah Absensi Manual (backfill izin/sakit/alpha)</summary>
+                            <form method="POST" action="{{ route('admin.absensi.store') }}" class="mt-3 flex flex-wrap items-end gap-3 p-3 bg-gray-50 rounded-xl">
+                                @csrf
+                                <input type="hidden" name="user_id" value="{{ $item->petugas->id }}">
+                                <div>
+                                    <x-input-label for="tanggal_{{ $item->petugas->id }}" value="Tanggal" />
+                                    <x-text-input id="tanggal_{{ $item->petugas->id }}" name="tanggal" type="date" max="{{ now()->toDateString() }}" class="mt-1 block" required />
+                                </div>
+                                <div>
+                                    <x-input-label for="status_{{ $item->petugas->id }}" value="Status" />
+                                    <select id="status_{{ $item->petugas->id }}" name="status" required
+                                            class="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
+                                        <option value="izin">Izin</option>
+                                        <option value="sakit">Sakit</option>
+                                        <option value="alpha">Alpha</option>
+                                        <option value="hadir">Hadir</option>
+                                    </select>
+                                </div>
+                                <div class="flex-1 min-w-48">
+                                    <x-input-label for="keterangan_{{ $item->petugas->id }}" value="Keterangan (opsional)" />
+                                    <x-text-input id="keterangan_{{ $item->petugas->id }}" name="keterangan" type="text" maxlength="255" class="mt-1 block w-full" />
+                                </div>
+                                <x-primary-button class="bg-green-600 hover:bg-green-700 transition">Simpan</x-primary-button>
+                            </form>
+                        </details>
+
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-sm">
                                 <thead>
@@ -45,6 +75,8 @@
                                         <th class="p-3 font-semibold text-gray-600">Foto Masuk</th>
                                         <th class="p-3 font-semibold text-gray-600">Foto Pulang</th>
                                         <th class="p-3 font-semibold text-gray-600">Status</th>
+                                        <th class="p-3 font-semibold text-gray-600">Keterangan</th>
+                                        <th class="p-3 font-semibold text-gray-600">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -77,10 +109,27 @@
                                                     {{ ucfirst($absen->status) }}
                                                 </span>
                                             </td>
+                                            <td class="p-3 text-gray-700 text-xs">{{ $absen->keterangan ?? '-' }}</td>
+                                            <td class="p-3">
+                                                <form method="POST" action="{{ route('admin.absensi.update-status', $absen->id) }}" class="flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <select name="status" onchange="this.form.submit()"
+                                                            class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-xs">
+                                                        <option value="hadir" @selected($absen->status == 'hadir')>Hadir</option>
+                                                        <option value="izin" @selected($absen->status == 'izin')>Izin</option>
+                                                        <option value="sakit" @selected($absen->status == 'sakit')>Sakit</option>
+                                                        <option value="alpha" @selected($absen->status == 'alpha')>Alpha</option>
+                                                    </select>
+                                                    <noscript>
+                                                        <button type="submit" class="px-2 py-1 text-xs bg-green-600 text-white rounded-lg">Simpan</button>
+                                                    </noscript>
+                                                </form>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="p-4 text-center text-gray-500">Belum ada data absensi pada bulan ini.</td>
+                                            <td colspan="8" class="p-4 text-center text-gray-500">Belum ada data absensi pada bulan ini.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>SIMPERSA - Sistem Informasi Manajemen Persampahan</title>
 
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -60,7 +61,7 @@
                 </h1>
 
                 <p class="text-lg text-[#706f6c] leading-relaxed mb-8">
-                    Platform integrasi pemantauan rute armada pengangkut, pencatatan timbangan sampah harian, hingga transparansi iuran bulanan warga secara 𝗿𝗲𝗮𝗹-𝘁𝗶𝗺𝗲.
+                    Platform terpadu pencatatan timbangan sampah harian, pengelolaan tabungan nasabah, penjualan ke pengepul, dan pemantauan stok &amp; keuangan bank sampah secara real-time.
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -72,9 +73,6 @@
                         <a href="{{ route('login') }}" class="w-full sm:w-auto text-center px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 shadow transition duration-150">
                             Mulai Akses Akun
                         </a>
-                        <a href="#fitur" class="w-full sm:w-auto text-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-100 transition duration-150">
-                            Pelajari Fitur
-                        </a>
                     @endauth
                 </div>
             </div>
@@ -85,5 +83,8 @@
             <p>&copy; {{ date('Y') }} SIMPERSA. Hak Cipta Dilindungi.</p>
         </footer>
 
+        <x-chatbot />
+
+        @stack('scripts')
     </body>
 </html>

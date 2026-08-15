@@ -15,6 +15,8 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>[x-cloak]{display:none !important;}</style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col md:flex-row">
@@ -36,7 +38,7 @@
                     <h1 class="text-4xl font-extrabold text-white mb-3 tracking-tight">SIMPERSA</h1>
                     <p class="text-emerald-100 text-lg font-medium">Sistem Informasi Manajemen<br>Persampahan Terintegrasi</p>
                     <div class="mt-8 border-t border-emerald-500/30 pt-6">
-                        <p class="text-emerald-200 text-sm">Kelola sampah, pantau iuran, dan wujudkan<br>lingkungan bersih bersama SIMPERSA.</p>
+                        <p class="text-emerald-200 text-sm">Kelola bank sampah, pantau kegiatan, dan wujudkan<br>lingkungan bersih bersama SIMPERSA.</p>
                     </div>
                 </div>
             </div>

@@ -46,4 +46,41 @@ class AbsensiController extends Controller
 
         return view('admin.absensi.index', compact('bulan', 'dataAbsensi'));
     }
+
+    // Koreksi status satu baris absensi
+    public function updateStatus(Request $request, AbsensiPetugas $absensi)
+    {
+        $request->validate([
+            'status' => 'required|in:hadir,izin,sakit,alpha',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $absensi->update([
+            'status' => $request->status,
+            'keterangan' => $request->keterangan ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Status absensi ' . $absensi->user->name . ' diperbarui menjadi ' . $request->status . '.');
+    }
+
+    // Tambah/catat absensi manual (backfill izin/sakit/alpha di hari tertentu)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'tanggal' => 'required|date|before_or_equal:today',
+            'status' => 'required|in:hadir,izin,sakit,alpha',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        AbsensiPetugas::updateOrCreate(
+            ['user_id' => $request->user_id, 'tanggal' => $request->tanggal],
+            [
+                'status' => $request->status,
+                'keterangan' => $request->keterangan ?: null,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Absensi manual berhasil disimpan.');
+    }
 }

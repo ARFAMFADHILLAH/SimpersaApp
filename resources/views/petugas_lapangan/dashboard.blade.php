@@ -5,7 +5,7 @@
             <div class="max-w-7xl mx-auto space-y-6">
 
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Dashboard Konter — Petugas</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard Petugas</h1>
                     <p class="text-sm text-gray-500 mt-1">Ringkasan transaksi penimbangan hari ini, {{ now()->format('d M Y') }}</p>
                 </div>
 
@@ -59,12 +59,12 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-4">
+                        {{-- <div class="mt-4">
                             <a href="{{ route('petugas.pembelian.index') }}" class="inline-block text-sm font-semibold text-green-600 hover:text-green-800">&rarr; Buka Form Pembelian Sampah</a>
-                        </div>
+                        </div> --}}
                     </div>
 
-                    <!-- Saldo Terbesar -->
+                    {{-- <!-- Saldo Terbesar -->
                     <div class="bg-white rounded-xl shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Saldo Tabungan Terbesar</h3>
                         @if($saldoTerbesar)
@@ -73,10 +73,10 @@
                             <p class="text-xs text-gray-400 mt-2">No. {{ $saldoTerbesar->no_warga }}</p>
                         @else
                             <p class="text-sm text-gray-400">Belum ada data warga.</p>
-                        @endif
-                        <div class="mt-6 pt-4 border-t">
+                        @endif --}}
+                        {{-- <div class="mt-6 pt-4 border-t">
                             <a href="{{ route('petugas.gaji.index') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Lihat Slip Gaji Saya &raquo;</a>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

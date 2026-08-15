@@ -30,7 +30,6 @@ class AbsensiController extends Controller
 
         return view('petugas_lapangan.absensi.index', compact('absensiHariIni', 'riwayatAbsensi', 'totalHadir'));
     }
-
     // Aksi Clock-In (Masuk)
     public function clockIn(Request $request)
     {
@@ -44,6 +43,10 @@ class AbsensiController extends Controller
 
         if ($absensi && $absensi->jam_masuk) {
             return redirect()->back()->with('error', 'Anda sudah melakukan Clock-In hari ini.');
+        }
+
+        if ($absensi && in_array($absensi->status, ['izin', 'sakit'])) {
+            return redirect()->back()->with('error', 'Hari ini sudah tercatat ' . $absensi->status . '. Anda tidak dapat Clock-In.');
         }
 
         $request->validate([
@@ -94,5 +97,62 @@ class AbsensiController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Berhasil Clock-Out! Hati-hati di jalan.');
+    }
+
+    // Lapor Izin / Sakit (tanpa clock-in)
+    public function lapor(Request $request)
+    {
+        $today = Carbon::today()->toDateString();
+        $userId = Auth::id();
+
+        $request->validate([
+            'status' => 'required|in:izin,sakit',
+            'keterangan' => 'nullable|string|max:255',
+        ]);
+
+        $absensi = AbsensiPetugas::where('user_id', $userId)
+            ->where('tanggal', $today)
+            ->first();
+
+        if ($absensi && $absensi->jam_masuk) {
+            return redirect()->back()->with('error', 'Anda sudah Clock-In hari ini, tidak dapat melapor izin/sakit.');
+        }
+
+        if ($absensi && in_array($absensi->status, ['izin', 'sakit'])) {
+            return redirect()->back()->with('error', 'Anda sudah melapor ' . $absensi->status . ' hari ini.');
+        }
+
+        AbsensiPetugas::updateOrCreate(
+            ['user_id' => $userId, 'tanggal' => $today],
+            [
+                'status' => $request->status,
+                'keterangan' => $request->keterangan ?: null,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Laporan ' . $request->status . ' berhasil disimpan.');
+    }
+
+    // Batalkan laporan izin/sakit hari ini (belum ada jam masuk)
+    public function laporBatal()
+    {
+        $today = Carbon::today()->toDateString();
+        $userId = Auth::id();
+
+        $absensi = AbsensiPetugas::where('user_id', $userId)
+            ->where('tanggal', $today)
+            ->first();
+
+        if (! $absensi || ! in_array($absensi->status, ['izin', 'sakit'])) {
+            return redirect()->back()->with('error', 'Tidak ada laporan izin/sakit hari ini untuk dibatalkan.');
+        }
+
+        if ($absensi->jam_masuk) {
+            return redirect()->back()->with('error', 'Tidak dapat membatalkan karena sudah ada jam masuk.');
+        }
+
+        $absensi->delete();
+
+        return redirect()->back()->with('success', 'Laporan izin/sakit berhasil dibatalkan.');
     }
 }

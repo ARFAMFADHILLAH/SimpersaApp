@@ -9,6 +9,7 @@ class SetoranSampah extends Model
     protected $table = 'setoran_sampahs';
 
     protected $fillable = [
+        'kode_transaksi',
         'warga_id',
         'jenis_sampah_id',
         'berat_kg',

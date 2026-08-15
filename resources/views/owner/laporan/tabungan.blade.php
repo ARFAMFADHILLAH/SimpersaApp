@@ -6,7 +6,7 @@
 
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Saldo Tabungan Warga</h1>
-                    <p class="text-sm text-gray-500 mt-1">Posisi tabungan seluruh nasabah (read-only).</p>
+                    <p class="text-sm text-gray-500 mt-1">Posisi tabungan seluruh nasabah</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

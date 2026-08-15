@@ -40,7 +40,7 @@ class PenggunaController extends Controller
                 'nama'      => $user->name,
                 'email'     => $user->email,
                 'role'      => $user->role->name ?? '-',
-                'aktif'     => (bool) $user->is_active,
+                'aktif'     => $user->status === 'aktif',
                 'terdaftar' => $user->created_at ? $user->created_at->format('d/m/Y') : '-',
             ];
         });

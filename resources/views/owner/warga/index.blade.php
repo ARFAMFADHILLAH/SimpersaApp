@@ -7,11 +7,11 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Monitoring Nasabah Warga</h1>
-                        <p class="text-sm text-gray-500 mt-1">Data nasabah beserta aktivitas setoran &amp; saldo (read-only).</p>
+                        <p class="text-sm text-gray-500 mt-1">Data nasabah beserta aktivitas setoran &amp; saldo</p>
                     </div>
                     <form action="{{ route('owner.warga.index') }}" method="GET" class="flex gap-2">
                         <input type="text" name="q" value="{{ $keyword }}" placeholder="Cari nama / no warga..." class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
-                        <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Cari</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold rounded-lg">Cari</button>
                     </form>
                 </div>
 

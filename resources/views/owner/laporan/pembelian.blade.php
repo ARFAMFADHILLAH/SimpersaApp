@@ -7,7 +7,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Laporan Pembelian Sampah Warga</h1>
-                        <p class="text-sm text-gray-500 mt-1">Rincian belanja operasional dari warga (read-only).</p>
+                        <p class="text-sm text-gray-500 mt-1">Rincian belanja operasional dari warga</p>
                     </div>
                     <form action="{{ route('owner.laporan.pembelian') }}" method="GET" class="flex gap-2">
                         <select name="warga_id" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
@@ -17,7 +17,7 @@
                             @endforeach
                         </select>
                         <input type="date" name="tanggal" value="{{ $tanggal }}" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
-                        <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Filter</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold rounded-lg">Filter</button>
                     </form>
                 </div>
 

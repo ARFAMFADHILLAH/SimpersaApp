@@ -14,6 +14,8 @@ class TabunganController extends Controller
      */
     public function index(Request $request)
     {
+        $status = $request->get('status', '');
+
         $dataWarga = Warga::with(['user', 'setoranSampah', 'penarikanSaldo'])
             ->orderBy('id')
             ->get()
@@ -30,6 +32,7 @@ class TabunganController extends Controller
             });
 
         $riwayatPenarikan = PenarikanSaldo::with('warga.user')
+            ->when($status !== '' && in_array($status, ['Diproses', 'Ditarik']), fn ($q) => $q->where('status', $status))
             ->latest('tanggal_penarikan')
             ->get();
 
@@ -40,7 +43,8 @@ class TabunganController extends Controller
             'dataWarga',
             'riwayatPenarikan',
             'rekapDiproses',
-            'rekapDitarik'
+            'rekapDitarik',
+            'status'
         ));
     }
 

@@ -6,6 +6,7 @@ use App\Models\JenisSampah;
 use App\Models\KategoriSampah;
 use App\Models\PenarikanSaldo;
 use App\Models\PengaturanGaji;
+use App\Models\SetoranSampah;
 use App\Models\User;
 use App\Models\Warga;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -152,8 +153,9 @@ class AllRolesPostTest extends TestCase
 
         $response = $this->actingAs($petugas)->post(route('petugas.pembelian.store'), [
             'warga_id' => $warga->id,
-            'jenis_sampah_id' => $jenis->id,
-            'berat_kg' => 3,
+            'items' => [
+                ['jenis_sampah_id' => $jenis->id, 'berat_kg' => 3],
+            ],
             'tanggal_setoran' => now()->toDateString(),
             'keterangan' => 'Setoran mingguan',
         ]);
@@ -165,6 +167,7 @@ class AllRolesPostTest extends TestCase
             'berat_kg' => 3,
             'harga_per_kg' => 2000,
             'total_bayar' => 6000,
+            'kode_transaksi' => 'STR-' . str_replace('-', '', now()->toDateString()) . '-0001',
         ]);
 
         $warga->refresh();
@@ -179,24 +182,67 @@ class AllRolesPostTest extends TestCase
 
         $this->actingAs($petugas)->post(route('petugas.pembelian.store'), [
             'warga_id' => $warga->id,
-            'jenis_sampah_id' => $jenis->id,
-            'berat_kg' => 0,
+            'items' => [
+                ['jenis_sampah_id' => $jenis->id, 'berat_kg' => 0],
+            ],
             'tanggal_setoran' => now()->toDateString(),
-        ])->assertSessionHasErrors('berat_kg');
+        ])->assertSessionHasErrors('items.0.berat_kg');
 
         $this->assertSame(0.0, (float) $warga->refresh()->saldo_tabungan);
+    }
+
+    public function test_petugas_pembelian_multi_item_saldo_bertambah_subtotal(): void
+    {
+        $petugas = $this->makeUser('Andi', 'petugas_lapangan');
+        $warga = $this->buatWarga();
+        $master = $this->buatMaster();
+        $jenis2 = JenisSampah::create([
+            'kategori_sampah_id' => $master['kategori']->id,
+            'nama_jenis' => 'Botol Plastik',
+            'tarif_per_kg' => 3000,
+            'tarif_jual_per_kg' => 3500,
+        ]);
+
+        $response = $this->actingAs($petugas)->post(route('petugas.pembelian.store'), [
+            'warga_id' => $warga->id,
+            'items' => [
+                ['jenis_sampah_id' => $master['jenis']->id, 'berat_kg' => 2],
+                ['jenis_sampah_id' => $jenis2->id, 'berat_kg' => 4],
+            ],
+            'tanggal_setoran' => now()->toDateString(),
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseCount('setoran_sampahs', 2);
+        $this->assertDatabaseHas('setoran_sampahs', ['jenis_sampah_id' => $master['jenis']->id, 'total_bayar' => 4000]);
+        $this->assertDatabaseHas('setoran_sampahs', ['jenis_sampah_id' => $jenis2->id, 'total_bayar' => 12000]);
+
+        $kode = \App\Models\SetoranSampah::where('kode_transaksi', 'STR-' . str_replace('-', '', now()->toDateString()) . '-0001')->count();
+        $this->assertSame(2, $kode);
+
+        $this->assertSame(16000, (int) $warga->refresh()->saldo_tabungan);
     }
 
     public function test_petugas_mencatat_penjualan_sampah_ke_pengepul(): void
     {
         $petugas = $this->makeUser('Andi', 'petugas_lapangan');
+        $warga = $this->buatWarga();
         ['jenis' => $jenis] = $this->buatMaster();
 
-        $response = $this->actingAs($petugas)->post(route('petugas.penjualan.store'), [
+        SetoranSampah::create([
+            'warga_id' => $warga->id,
             'jenis_sampah_id' => $jenis->id,
+            'berat_kg' => 10,
+            'harga_per_kg' => $jenis->tarif_per_kg,
+            'total_bayar' => 10 * $jenis->tarif_per_kg,
+            'tanggal_setoran' => now()->toDateString(),
+        ]);
+
+        $response = $this->actingAs($petugas)->post(route('petugas.penjualan.store'), [
+            'items' => [
+                ['jenis_sampah_id' => $jenis->id, 'berat_kg' => 6, 'harga_jual_per_kg' => 2500],
+            ],
             'nama_pengepul' => 'Bapak Tono',
-            'berat_kg' => 6,
-            'harga_jual_per_kg' => 2500,
             'tanggal_penjualan' => now()->toDateString(),
             'catatan' => 'Penjualan rutin',
         ]);
@@ -209,19 +255,68 @@ class AllRolesPostTest extends TestCase
             'berat_kg' => 6,
             'harga_jual_per_kg' => 2500,
             'total_harga' => 15000,
+            'kode_transaksi' => 'JUAL-' . str_replace('-', '', now()->toDateString()) . '-0001',
         ]);
+    }
+
+    public function test_petugas_mencatat_penjualan_multi_item(): void
+    {
+        $petugas = $this->makeUser('Andi', 'petugas_lapangan');
+        $warga = $this->buatWarga();
+        $master = $this->buatMaster();
+        $jenis2 = JenisSampah::create([
+            'kategori_sampah_id' => $master['kategori']->id,
+            'nama_jenis' => 'Botol Plastik',
+            'tarif_per_kg' => 3000,
+            'tarif_jual_per_kg' => 3500,
+        ]);
+
+        foreach ([$master['jenis']->id => 3, $jenis2->id => 5] as $id => $berat) {
+            SetoranSampah::create([
+                'warga_id' => $warga->id,
+                'jenis_sampah_id' => $id,
+                'berat_kg' => $berat,
+                'harga_per_kg' => 2000,
+                'total_bayar' => $berat * 2000,
+                'tanggal_setoran' => now()->toDateString(),
+            ]);
+        }
+
+        $response = $this->actingAs($petugas)->post(route('petugas.penjualan.store'), [
+            'items' => [
+                ['jenis_sampah_id' => $master['jenis']->id, 'berat_kg' => 2, 'harga_jual_per_kg' => 3000],
+                ['jenis_sampah_id' => $jenis2->id, 'berat_kg' => 4, 'harga_jual_per_kg' => 3500],
+            ],
+            'nama_pengepul' => 'Bapak Tono',
+            'tanggal_penjualan' => now()->toDateString(),
+        ]);
+
+        $response->assertRedirect(route('petugas.penjualan.index'));
+        $this->assertDatabaseCount('penjualan_sampah', 2);
+        $this->assertDatabaseHas('penjualan_sampah', ['jenis_sampah_id' => $master['jenis']->id, 'total_harga' => 6000]);
+        $this->assertDatabaseHas('penjualan_sampah', ['jenis_sampah_id' => $jenis2->id, 'total_harga' => 14000]);
     }
 
     public function test_bendahara_mencatat_penjualan_dari_meja_keuangan(): void
     {
         $bendahara = $this->makeUser('Bendahara', 'bendahara');
+        $warga = $this->buatWarga();
         ['jenis' => $jenis] = $this->buatMaster();
 
-        $response = $this->actingAs($bendahara)->post(route('bendahara.penjualan.store'), [
+        SetoranSampah::create([
+            'warga_id' => $warga->id,
             'jenis_sampah_id' => $jenis->id,
+            'berat_kg' => 5,
+            'harga_per_kg' => $jenis->tarif_per_kg,
+            'total_bayar' => 5 * $jenis->tarif_per_kg,
+            'tanggal_setoran' => now()->toDateString(),
+        ]);
+
+        $response = $this->actingAs($bendahara)->post(route('bendahara.penjualan.store'), [
+            'items' => [
+                ['jenis_sampah_id' => $jenis->id, 'berat_kg' => 2, 'harga_jual_per_kg' => 3000],
+            ],
             'nama_pengepul' => 'CV Bersih Sejahtera',
-            'berat_kg' => 2,
-            'harga_jual_per_kg' => 3000,
             'tanggal_penjualan' => now()->toDateString(),
         ]);
 
@@ -331,11 +426,11 @@ class AllRolesPostTest extends TestCase
 
         // Route POST modul lain ditolak via middleware role
         $this->actingAs($owner)->post(route('petugas.pembelian.store'), [
-            'warga_id' => 1, 'jenis_sampah_id' => $jenis->id, 'berat_kg' => 1,
+            'warga_id' => 1, 'items' => [['jenis_sampah_id' => $jenis->id, 'berat_kg' => 1]],
         ])->assertForbidden();
 
         $this->actingAs($owner)->post(route('bendahara.penjualan.store'), [
-            'jenis_sampah_id' => $jenis->id, 'berat_kg' => 1, 'harga_jual_per_kg' => 1000,
+            'items' => [['jenis_sampah_id' => $jenis->id, 'berat_kg' => 1, 'harga_jual_per_kg' => 1000]],
         ])->assertForbidden();
 
         $this->actingAs($owner)->post(route('admin.jenis-sampah.store'), [

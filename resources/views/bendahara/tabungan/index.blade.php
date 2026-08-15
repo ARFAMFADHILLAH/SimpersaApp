@@ -107,7 +107,20 @@
 
                     <!-- RIWAYAT PENARIKAN -->
                     <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Riwayat Penarikan &amp; Konfirmasi</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Riwayat Penarikan &amp; Konfirmasi</h3>
+                            <form action="{{ route('bendahara.tabungan.index') }}" method="GET" class="flex items-center gap-2">
+                                <select name="status" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
+                                    <option value="">Semua Status</option>
+                                    <option value="Diproses" {{ $status === 'Diproses' ? 'selected' : '' }}>Diproses</option>
+                                    <option value="Ditarik" {{ $status === 'Ditarik' ? 'selected' : '' }}>Ditarik</option>
+                                </select>
+                                <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Filter</button>
+                                @if($status !== '')
+                                    <a href="{{ route('bendahara.tabungan.index') }}" class="text-xs font-semibold text-gray-500 hover:text-gray-700">Reset</a>
+                                @endif
+                            </form>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead>

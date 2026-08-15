@@ -12,11 +12,17 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua user beserta role-nya
-        $users = User::with('role')->latest()->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $users = User::with('role')
+            ->when($request->role_id, fn ($q) => $q->where('role_id', $request->role_id))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $roles = Role::orderBy('name')->get();
+
+        return view('admin.users.index', compact('users', 'roles'));
     }
 
     public function create()

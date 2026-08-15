@@ -17,6 +17,7 @@ class AbsensiPetugas extends Model
         'jam_masuk',
         'jam_pulang',
         'status',
+        'keterangan',
         'foto_masuk',
         'foto_pulang',
     ];

@@ -6,12 +6,12 @@
 
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Ringkasan Bisnis — POS Bank Sampah</h1>
-                        <p class="text-sm text-gray-500 mt-1">Rekapitulasi keuangan tahun {{ $tahun }} (semua angka read-only untuk pemantauan).</p>
+                        <h1 class="text-2xl font-bold text-gray-900">Ringkasan Laporan</h1>
+                        <p class="text-sm text-gray-500 mt-1">Rekapitulasi keuangan tahun {{ $tahun }}</p>
                     </div>
                     <form action="{{ route('owner.laporan.index') }}" method="GET" class="flex gap-2">
                         <input type="number" name="tahun" value="{{ $tahun }}" min="2000" max="2100" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
-                        <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Tampilkan</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg">Tampilkan</button>
                     </form>
                 </div>
 
@@ -60,12 +60,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
-                    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                        <a href="{{ route('owner.laporan.kas') }}" class="text-green-600 hover:text-green-800 font-semibold">Detail Arus Kas &raquo;</a>
-                        <a href="{{ route('owner.laporan.pembelian') }}" class="text-green-600 hover:text-green-800 font-semibold">Laporan Pembelian &raquo;</a>
-                        <a href="{{ route('owner.laporan.penjualan') }}" class="text-green-600 hover:text-green-800 font-semibold">Laporan Penjualan &raquo;</a>
-                        <a href="{{ route('owner.laporan.gaji') }}" class="text-green-600 hover:text-green-800 font-semibold">Penggajian &raquo;</a>
                     </div>
                 </div>
             </div>

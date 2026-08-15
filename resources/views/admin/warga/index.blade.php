@@ -6,7 +6,7 @@
 
             <!-- NOTIFIKASI -->
             @if(session('success'))
-                <div class="bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-3 rounded-xl text-sm" role="alert">
+                <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-xl text-sm" role="alert">
                     <span>{{ session('success') }}</span>
                 </div>
             @endif
@@ -43,16 +43,26 @@
                     </div>
 
                     <div class="flex items-center gap-4 pt-2">
-                        <x-primary-button class="bg-indigo-600 hover:bg-indigo-700">
+                        <x-primary-button class="bg-green-600 hover:bg-green-700">
                             {{ __('Daftarkan Warga') }}
                         </x-primary-button>
                     </div>
                 </form>
             </div>
+        </br>
 
             <!-- TABEL DATA WARGA -->
             <div class="p-6 bg-white shadow-sm sm:rounded-xl border border-gray-100">
-                <h3 class="text-base font-bold text-gray-900 mb-4 border-b pb-2">📋 Daftar Warga Terregistrasi</h3>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 border-b pb-2">
+                    <h3 class="text-base font-bold text-gray-900">📋 Daftar Warga Terregistrasi</h3>
+                    <form action="{{ route('admin.warga.index') }}" method="GET" class="flex items-center gap-2">
+                        <input type="text" name="q" value="{{ $keyword }}" placeholder="Cari nama / no warga / email..." class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
+                        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg">Cari</button>
+                        @if($keyword)
+                            <a href="{{ route('admin.warga.index') }}" class="text-xs font-semibold text-gray-500 hover:text-gray-700">Reset</a>
+                        @endif
+                    </form>
+                </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
@@ -69,7 +79,7 @@
                         <tbody class="divide-y divide-gray-100">
                             @forelse($dataWarga as $plg)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="p-3 font-bold text-indigo-600 font-mono">{{ $plg->no_warga }}</td>
+                                    <td class="p-3 font-bold text-green-600 font-mono">{{ $plg->no_warga }}</td>
                                     <td class="p-3 font-semibold text-gray-900">{{ $plg->user->name ?? '-' }}</td>
                                     <td class="p-3 text-xs">
                                         <div class="font-medium text-gray-900">{{ $plg->no_hp }}</div>

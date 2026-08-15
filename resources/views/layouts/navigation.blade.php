@@ -93,10 +93,10 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu (Mobile Only Drawer) -->
+    <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-gray-50 border-t border-gray-200">
         <div class="pt-2 pb-3 space-y-1">
-            <!-- RUTE SIFAT MOBIL DIBAWAH INI SUDAH DIPERBAIKI -->
+            <!-- RUTE SIFAT MOBILE  -->
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('*.dashboard')">
                 {{ __('Dashboard Utama') }}
             </x-responsive-nav-link>

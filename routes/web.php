@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChatbotController;
 
 // =========================================================================
 // CONTROLLER POS BANK SAMPAH (SIMPERSA)
@@ -39,10 +40,15 @@ use App\Http\Controllers\Owner\LaporanController as OwnerLaporanController;
 use App\Http\Controllers\Owner\ManagerWargaController as OwnerWargaController;
 use App\Http\Controllers\Owner\PenggunaController as OwnerPenggunaController;
 use App\Http\Controllers\Owner\ManagerKeuanganController as OwnerKeuanganController;
+use App\Http\Controllers\Owner\StokController as OwnerStokController;
+use App\Http\Controllers\Admin\StokController as AdminStokController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Chatbot Asisten SIMPERSA (tanpa middleware auth: welcome juga bisa untuk tamu)
+Route::post('/chatbot/tanya', [ChatbotController::class, 'tanya'])->name('chatbot.tanya');
 
 // Profil Bawaan (Semua User Login)
 Route::middleware('auth')->group(function () {
@@ -74,6 +80,11 @@ Route::middleware(['auth', 'role:admin,administrator,administrasi'])->prefix('ad
 
     // Rekap Kehadiran Petugas
     Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
+    Route::post('/absensi', [AdminAbsensiController::class, 'store'])->name('absensi.store');
+    Route::patch('/absensi/{absensi}', [AdminAbsensiController::class, 'updateStatus'])->name('absensi.update-status');
+
+    // Stok Sampah
+    Route::get('/stok', [AdminStokController::class, 'index'])->name('stok.index');
 
     // Utilitas Sistem (Backup Data)
     Route::get('/sistem', [SistemController::class, 'index'])->name('sistem.index');
@@ -99,6 +110,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::get('/keuangan', [OwnerKeuanganController::class, 'index'])->name('keuangan.index');
     Route::get('/warga', [OwnerWargaController::class, 'index'])->name('warga.index');
     Route::get('/pengguna', [OwnerPenggunaController::class, 'index'])->name('pengguna.index');
+    Route::get('/stok', [OwnerStokController::class, 'index'])->name('stok.index');
 });
 
 // =========================================================================
@@ -158,6 +170,8 @@ Route::middleware(['auth', 'role:petugas,petugas_lapangan'])->prefix('petugas')-
     Route::get('/absensi', [KasirAbsensiController::class, 'index'])->name('absensi.index');
     Route::post('/absensi/clockin', [KasirAbsensiController::class, 'clockIn'])->name('absensi.clockin');
     Route::post('/absensi/clockout', [KasirAbsensiController::class, 'clockOut'])->name('absensi.clockout');
+    Route::post('/absensi/lapor', [KasirAbsensiController::class, 'lapor'])->name('absensi.lapor');
+    Route::delete('/absensi/lapor', [KasirAbsensiController::class, 'laporBatal'])->name('absensi.lapor-batal');
 
     // Gaji & Slip Gaji Pribadi
     Route::get('/gaji', [KasirGajiController::class, 'index'])->name('gaji.index');

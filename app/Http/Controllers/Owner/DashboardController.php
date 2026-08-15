@@ -8,6 +8,7 @@ use App\Models\SetoranSampah;
 use App\Models\PenjualanSampah;
 use App\Models\PenarikanSaldo;
 use App\Models\Penggajian;
+use App\Support\StokSampah;
 
 class DashboardController extends Controller
 {
@@ -44,6 +45,8 @@ class DashboardController extends Controller
 
         $totalKeluarBulanIni = $totalBelanjaBulanIni + $totalTarikBulanIni + $totalGajiBulanIni;
         $labaBulanIni = $totalMasukBulanIni - $totalKeluarBulanIni;
+
+        $totalStokSampah = StokSampah::total();
 
         // Penjualan terbaru
         $penjualanTerbaru = PenjualanSampah::with('jenisSampah')
@@ -95,7 +98,8 @@ class DashboardController extends Controller
             'setoranTerbaru',
             'grafikBulan',
             'grafikMasuk',
-            'grafikKeluar'
+            'grafikKeluar',
+            'totalStokSampah'
         ));
     }
 }

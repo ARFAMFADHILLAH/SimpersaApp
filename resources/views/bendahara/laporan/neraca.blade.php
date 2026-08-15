@@ -7,7 +7,6 @@
 
                 <div class="flex justify-between items-center">
                     <div>
-                        <a href="{{ route('bendahara.laporan.index') }}" class="text-xs text-indigo-600 hover:underline">&larr; Kembali ke Laporan Keuangan</a>
                         <h2 class="text-xl font-bold text-gray-900 mt-1">Neraca Kas</h2>
                         <p class="text-xs text-gray-500">Posisi kas (saldo) hingga periode terpilih</p>
                     </div>

@@ -5,12 +5,12 @@
             <div class="max-w-7xl mx-auto space-y-6">
 
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Dashboard Pusat — Bank Sampah</h1>
-                    <p class="text-sm text-gray-500 mt-1">Ringkasan operasional konter penimbangan & keuangan POS ({{ now()->format('d M Y') }})</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard — Bank Sampah</h1>
+                    <p class="text-sm text-gray-500 mt-1">Ringkasan operasional penimbangan & keuangan POS ({{ now()->format('d M Y') }})</p>
                 </div>
 
                 <!-- Kartu Statistik Utama -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div class="bg-white rounded-xl shadow p-5">
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nasabah Warga</p>
                         <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalWarga, 0, ',', '.') }}</p>
@@ -22,14 +22,18 @@
                         <p class="text-xs text-gray-400 mt-1">Total aset tabungan nasabah</p>
                     </div>
                     <div class="bg-white rounded-xl shadow p-5">
-                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Master Sampah</p>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Kategori Sampah</p>
                         <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalKategori, 0, ',', '.') }} Kategori</p>
                         <p class="text-xs text-gray-400 mt-1">{{ number_format($totalJenis, 0, ',', '.') }} jenis &amp; tarif</p>
                     </div>
                     <div class="bg-white rounded-xl shadow p-5">
-                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pengguna Sistem</p>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Jumlah User</p>
                         <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalPetugas, 0, ',', '.') }}</p>
                         <p class="text-xs text-gray-400 mt-1">admin, bendahara &amp; petugas</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Stok Sampah Tersedia</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1">{{ number_format($totalStokSampah, 2, ',', '.') }} kg</p>
                     </div>
                 </div>
 
@@ -54,7 +58,7 @@
 
                 <!-- Grafik 12 Bulan -->
                 <div class="bg-white rounded-xl shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik 12 Bulan: Belanja Warga vs Penjualan Pengepul</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik 12 Bulan: Belanja Warga & Penjualan Ke Pengepul</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
@@ -82,7 +86,7 @@
                     <div class="bg-white rounded-xl shadow p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">Setoran Terbaru</h3>
-                            <a href="{{ route('admin.jenis-sampah.index') }}" class="text-xs font-semibold text-green-600 hover:text-green-800">Master Jenis &raquo;</a>
+                            {{-- <a href="{{ route('admin.jenis-sampah.index') }}" class="text-xs font-semibold text-green-600 hover:text-green-800">Master Jenis &raquo;</a> --}}
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">

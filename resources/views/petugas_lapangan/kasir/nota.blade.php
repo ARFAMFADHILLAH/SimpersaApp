@@ -16,7 +16,7 @@
                         </div>
                         <p class="mt-3 text-sm text-gray-600 font-semibold">NOTA PENIMBANGAN &amp; PEMBELIAN SAMPAH</p>
                         <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600">
-                            <p>No. Transaksi: <span class="font-semibold text-gray-900">ST-{{ str_pad($setoran->id, 6, '0', STR_PAD_LEFT) }}</span></p>
+                            <p>No. Transaksi: <span class="font-semibold text-gray-900">{{ $setoran->kode_transaksi ?? 'ST-'.str_pad($setoran->id, 6, '0', STR_PAD_LEFT) }}</span></p>
                             <p class="text-right">Tanggal: {{ \Carbon\Carbon::parse($setoran->tanggal_setoran)->format('d/m/Y') }}</p>
                             <p>Petugas: {{ auth()->user()->name }}</p>
                         </div>
@@ -32,28 +32,38 @@
                             <p class="text-sm text-gray-500">No. Warga</p>
                             <p class="text-sm font-semibold">{{ $setoran->warga->no_warga }}</p>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500">Kategori</p>
-                            <p class="text-sm font-semibold">{{ $setoran->jenisSampah->kategoriSampah->nama_kategori ?? '-' }}</p>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500">Jenis Sampah</p>
-                            <p class="text-sm font-semibold">{{ $setoran->jenisSampah->nama_jenis ?? '-' }}</p>
+
+                        <!-- Daftar Item -->
+                        <div class="border-t border-dashed pt-4">
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Rincian Item</p>
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-xs text-gray-500">
+                                        <th class="py-1.5 pr-2 font-semibold">Jenis Sampah</th>
+                                        <th class="py-1.5 pr-2 font-semibold text-right">Berat</th>
+                                        <th class="py-1.5 pr-2 font-semibold text-right">Harga/Kg</th>
+                                        <th class="py-1.5 font-semibold text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($items as $item)
+                                        <tr class="border-b border-dashed border-gray-100">
+                                            <td class="py-2 pr-2">
+                                                {{ $item->jenisSampah->nama_jenis ?? '-' }}
+                                                <span class="block text-xs text-gray-400">{{ $item->jenisSampah->kategoriSampah->nama_kategori ?? '' }}</span>
+                                            </td>
+                                            <td class="py-2 pr-2 text-right">{{ number_format($item->berat_kg, 2, ',', '.') }} kg</td>
+                                            <td class="py-2 pr-2 text-right">Rp {{ number_format($item->harga_per_kg, 0, ',', '.') }}</td>
+                                            <td class="py-2 text-right font-semibold">Rp {{ number_format($item->total_bayar, 0, ',', '.') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
 
-                        <div class="border-t border-dashed pt-4 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-gray-500">Berat / Volume</p>
-                                <p class="text-sm font-semibold">{{ number_format($setoran->berat_kg, 2, ',', '.') }} kg</p>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-gray-500">Harga per Kg</p>
-                                <p class="text-sm font-semibold">Rp {{ number_format($setoran->harga_per_kg, 0, ',', '.') }}</p>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-gray-500">Total Nilai Belanja</p>
-                                <p class="text-lg font-bold text-green-600">Rp {{ number_format($setoran->total_bayar, 0, ',', '.') }}</p>
-                            </div>
+                        <div class="border-t border-dashed pt-4 flex items-center justify-between">
+                            <p class="text-sm font-bold text-gray-900">Subtotal</p>
+                            <p class="text-lg font-bold text-green-600">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}</p>
                         </div>
 
                         @if($setoran->keterangan)

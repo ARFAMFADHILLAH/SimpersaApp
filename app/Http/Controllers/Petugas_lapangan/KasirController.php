@@ -8,6 +8,8 @@ use App\Models\KategoriSampah;
 use App\Models\PenjualanSampah;
 use App\Models\SetoranSampah;
 use App\Models\Warga;
+use App\Support\KodeTransaksi;
+use App\Support\StokSampah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,49 +52,73 @@ class KasirController extends Controller
     }
 
     /**
-     * Simpan transaksi pembelian sampah dari warga (dikredit ke saldo tabungan warga).
+     * Simpan transaksi pembelian sampah dari warga (multi-item, dikredit ke saldo tabungan warga).
      */
     public function storePembelian(Request $request)
     {
         $validated = $request->validate([
             'warga_id'          => 'required|exists:warga,id',
-            'jenis_sampah_id'   => 'required|exists:jenis_sampah_dan_tarif,id',
-            'berat_kg'          => 'required|numeric|min:0.01',
             'tanggal_setoran'   => 'required|date',
             'keterangan'        => 'nullable|string|max:255',
+            'items'             => 'required|array|min:1',
+            'items.*.jenis_sampah_id' => 'required|exists:jenis_sampah_dan_tarif,id',
+            'items.*.berat_kg'  => 'required|numeric|min:0.01',
+        ], [
+            'items.required'             => 'Minimal satu item sampah harus diisi.',
+            'items.*.jenis_sampah_id.required' => 'Pilih jenis sampah pada setiap item.',
+            'items.*.berat_kg.min'       => 'Berat sampah setiap item minimal 0.01 kg.',
         ]);
 
-        $jenis = JenisSampah::findOrFail($validated['jenis_sampah_id']);
-        $hargaPerKg = (int) $jenis->tarif_per_kg;
-        $totalBayar = (int) round($validated['berat_kg'] * $hargaPerKg);
+        $hasil = DB::transaction(function () use ($validated) {
+            $kode = KodeTransaksi::buat('STR', 'setoran_sampahs', 'tanggal_setoran', $validated['tanggal_setoran']);
+            $totalKeseluruhan = 0;
 
-        $setoran = DB::transaction(function () use ($validated, $jenis, $hargaPerKg, $totalBayar) {
-            $setoran = SetoranSampah::create([
-                'warga_id'          => $validated['warga_id'],
-                'jenis_sampah_id'   => $jenis->id,
-                'berat_kg'          => $validated['berat_kg'],
-                'harga_per_kg'      => $hargaPerKg,
-                'total_bayar'       => $totalBayar,
-                'tanggal_setoran'   => $validated['tanggal_setoran'],
-                'keterangan'        => $validated['keterangan'] ?? null,
-            ]);
+            foreach ($validated['items'] as $item) {
+                $jenis = JenisSampah::findOrFail($item['jenis_sampah_id']);
+                $hargaPerKg = (int) $jenis->tarif_per_kg;
+                $totalBayar = (int) round($item['berat_kg'] * $hargaPerKg);
 
-            Warga::where('id', $validated['warga_id'])->increment('saldo_tabungan', $totalBayar);
+                SetoranSampah::create([
+                    'kode_transaksi'    => $kode,
+                    'warga_id'          => $validated['warga_id'],
+                    'jenis_sampah_id'   => $jenis->id,
+                    'berat_kg'          => $item['berat_kg'],
+                    'harga_per_kg'      => $hargaPerKg,
+                    'total_bayar'       => $totalBayar,
+                    'tanggal_setoran'   => $validated['tanggal_setoran'],
+                    'keterangan'        => $validated['keterangan'] ?? null,
+                ]);
 
-            return $setoran;
+                $totalKeseluruhan += $totalBayar;
+            }
+
+            Warga::where('id', $validated['warga_id'])->increment('saldo_tabungan', $totalKeseluruhan);
+
+            return $kode;
         });
+
+        $setoran = SetoranSampah::where('kode_transaksi', $hasil)->first();
 
         return redirect()->route('petugas.pembelian.nota', $setoran->id);
     }
 
     /**
-     * Cetak Nota hasil penimbangan untuk warga.
+     * Cetak Nota hasil penimbangan untuk warga (satu transaksi bisa berisi banyak item).
      */
     public function nota($id)
     {
         $setoran = SetoranSampah::with('warga.user', 'jenisSampah.kategoriSampah')->findOrFail($id);
 
-        return view('petugas_lapangan.kasir.nota', compact('setoran'));
+        $items = $setoran->kode_transaksi
+            ? SetoranSampah::with('jenisSampah.kategoriSampah')
+                ->where('kode_transaksi', $setoran->kode_transaksi)
+                ->orderBy('id')
+                ->get()
+            : collect([$setoran]);
+
+        $totalKeseluruhan = $items->sum('total_bayar');
+
+        return view('petugas_lapangan.kasir.nota', compact('setoran', 'items', 'totalKeseluruhan'));
     }
 
     /**
@@ -119,45 +145,88 @@ class KasirController extends Controller
         $totalHariIni = $riwayat->sum('total_harga');
         $totalBeratHariIni = $riwayat->sum('berat_kg');
 
+        $stokPerJenis = StokSampah::perJenis()->mapWithKeys(fn ($s) => [$s->jenis_id => $s->stok_kg]);
+
         return view('petugas_lapangan.kasir.penjualan', compact(
             'dataKategori',
             'daftarJenis',
             'riwayat',
             'totalHariIni',
             'totalBeratHariIni',
-            'tanggal'
+            'tanggal',
+            'stokPerJenis'
         ));
     }
 
     /**
-     * Simpan penjualan sampah ke pengepul.
+     * Simpan penjualan sampah ke pengepul (multi-item).
      */
     public function storePenjualan(Request $request)
     {
         $validated = $request->validate([
-            'jenis_sampah_id'   => 'required|exists:jenis_sampah_dan_tarif,id',
             'nama_pengepul'     => 'nullable|string|max:255',
-            'berat_kg'          => 'required|numeric|min:0.01',
-            'harga_jual_per_kg' => 'required|numeric|min:0',
             'tanggal_penjualan' => 'required|date',
             'catatan'           => 'nullable|string|max:255',
+            'items'             => 'required|array|min:1',
+            'items.*.jenis_sampah_id'   => 'required|exists:jenis_sampah_dan_tarif,id',
+            'items.*.berat_kg'          => 'required|numeric|min:0.01',
+            'items.*.harga_jual_per_kg' => 'required|numeric|min:0',
+        ], [
+            'items.required'             => 'Minimal satu item sampah harus diisi.',
+            'items.*.berat_kg.min'       => 'Berat sampah setiap item minimal 0.01 kg.',
         ]);
 
-        $jenis = JenisSampah::findOrFail($validated['jenis_sampah_id']);
-        $totalHarga = (int) round($validated['berat_kg'] * $validated['harga_jual_per_kg']);
+        $errorStok = $this->cekStok($validated['items']);
+        if ($errorStok) {
+            return back()->withInput()->withErrors(['items' => $errorStok]);
+        }
 
-        PenjualanSampah::create([
-            'kategori_sampah_id' => $jenis->kategori_sampah_id,
-            'jenis_sampah_id'    => $jenis->id,
-            'nama_pengepul'      => $validated['nama_pengepul'] ?? null,
-            'berat_kg'           => $validated['berat_kg'],
-            'harga_jual_per_kg'  => (int) $validated['harga_jual_per_kg'],
-            'total_harga'        => $totalHarga,
-            'tanggal_penjualan'  => $validated['tanggal_penjualan'],
-            'catatan'            => $validated['catatan'] ?? null,
-        ]);
+        DB::transaction(function () use ($validated) {
+            $kode = KodeTransaksi::buat('JUAL', 'penjualan_sampah', 'tanggal_penjualan', $validated['tanggal_penjualan']);
+
+            foreach ($validated['items'] as $item) {
+                $jenis = JenisSampah::findOrFail($item['jenis_sampah_id']);
+                $totalHarga = (int) round($item['berat_kg'] * $item['harga_jual_per_kg']);
+
+                PenjualanSampah::create([
+                    'kode_transaksi'     => $kode,
+                    'kategori_sampah_id' => $jenis->kategori_sampah_id,
+                    'jenis_sampah_id'    => $jenis->id,
+                    'nama_pengepul'      => $validated['nama_pengepul'] ?? null,
+                    'berat_kg'           => $item['berat_kg'],
+                    'harga_jual_per_kg'  => (int) $item['harga_jual_per_kg'],
+                    'total_harga'        => $totalHarga,
+                    'tanggal_penjualan'  => $validated['tanggal_penjualan'],
+                    'catatan'            => $validated['catatan'] ?? null,
+                ]);
+            }
+        });
 
         return redirect()->route('petugas.penjualan.index')
                          ->with('success', 'Penjualan sampah ke pengepul berhasil dicatat!');
+    }
+
+    /**
+     * Pastikan total berat terjual untuk tiap jenis tidak melebihi stok tersedia.
+     * Gabungkan permintaan per jenis terlebih dahulu agar tidak bisa diakali dengan item ganda.
+     */
+    private function cekStok(array $items): ?string
+    {
+        $permintaan = [];
+        foreach ($items as $item) {
+            $id = (int) $item['jenis_sampah_id'];
+            $permintaan[$id] = ($permintaan[$id] ?? 0) + (float) $item['berat_kg'];
+        }
+
+        foreach ($permintaan as $id => $berat) {
+            $stok = StokSampah::stokTersedia($id);
+            if ($berat > $stok + 0.0001) {
+                $jenis = JenisSampah::find($id);
+
+                return "Stok sampah \"{$jenis->nama_jenis}\" tidak mencukupi: tersedia {$stok} kg, diminta {$berat} kg.";
+            }
+        }
+
+        return null;
     }
 }

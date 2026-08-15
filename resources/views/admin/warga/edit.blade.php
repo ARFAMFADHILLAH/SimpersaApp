@@ -25,7 +25,7 @@
             <div class="p-6 bg-white shadow-sm sm:rounded-xl border border-gray-100">
                 <div class="flex items-center justify-between mb-6 border-b pb-3">
                     <h3 class="text-lg font-bold text-gray-900">Form Edit Warga</h3>
-                    <span class="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200">
+                    <span class="text-xs font-mono font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 transition px-3 py-1 rounded-full border border-green-600">
                         No. Warga: {{ $warga->no_warga }}
                     </span>
                 </div>
@@ -86,7 +86,7 @@
                         <a href="{{ route('admin.warga.index') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">
                             Batal
                         </a>
-                        <x-primary-button class="bg-indigo-600 hover:bg-indigo-700">
+                        <x-primary-button class="bg-green-600 hover:bg-green-700 transition">
                             {{ __('Simpan Perubahan') }}
                         </x-primary-button>
                     </div>

@@ -6,8 +6,8 @@
 
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Pengguna Sistem</h1>
-                        <p class="text-sm text-gray-500 mt-1">Daftar pengguna aktif (admin, bendahara, petugas) — read-only.</p>
+                        <h1 class="text-2xl font-bold text-gray-900">Data Pengguna</h1>
+                        <p class="text-sm text-gray-500 mt-1">Daftar pengguna aktif (admin, bendahara, petugas)</p>
                     </div>
                     <form action="{{ route('owner.pengguna.index') }}" method="GET" class="flex gap-2">
                         <input type="text" name="q" value="{{ $keyword }}" placeholder="Cari nama / email..." class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm">
@@ -18,7 +18,7 @@
                             <option value="petugas" {{ $roleFilter == 'petugas' ? 'selected' : '' }}>Petugas</option>
                             <option value="owner" {{ $roleFilter == 'owner' ? 'selected' : '' }}>Owner</option>
                         </select>
-                        <button type="submit" class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold rounded-lg">Filter</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold rounded-lg">Filter</button>
                     </form>
                 </div>
 

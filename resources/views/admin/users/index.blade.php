@@ -17,6 +17,22 @@
             </div>
         @endif
 
+        <!-- Filter Role -->
+        <form method="GET" action="{{ route('admin.users.index') }}" class="mb-4 flex items-center gap-2">
+            <select name="role_id" class="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm text-sm py-2 px-3">
+                <option value="">Semua Role</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}" @selected(request('role_id') == $role->id)>{{ ucwords(str_replace('_', ' ', $role->name)) }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm">
+                Filter
+            </button>
+            @if(request('role_id'))
+                <a href="{{ route('admin.users.index') }}" class="text-sm text-red-600 hover:text-red-800 font-medium">Reset</a>
+            @endif
+        </form>
+
         <!-- Table Section -->
         <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">

@@ -45,7 +45,7 @@
                     </div>
                 </div>
                 <div class="mt-4 pt-4 border-t flex justify-end">
-                    <a href="{{ route('admin.sistem.backup') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-4 py-2 rounded shadow transition-colors">
+                    <a href="{{ route('admin.sistem.backup') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-4 py-2 rounded shadow transition-colors">
                         Download File SQL Sekarang
                     </a>
                 </div>

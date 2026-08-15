@@ -5,12 +5,12 @@
             <div class="max-w-7xl mx-auto space-y-6">
 
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Dashboard Pimpinan — Owner</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard Owner</h1>
                     <p class="text-sm text-gray-500 mt-1">Pemantauan kinerja bank sampah, {{ now()->format('d M Y') }}</p>
                 </div>
 
                 <!-- Kartu Utama -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div class="bg-white rounded-xl shadow p-5">
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nasabah</p>
                         <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalNasabah, 0, ',', '.') }} warga</p>
@@ -31,11 +31,15 @@
                         <p class="text-2xl font-bold {{ $labaBulanIni >= 0 ? 'text-blue-600' : 'text-red-600' }} mt-1">Rp {{ number_format($labaBulanIni, 0, ',', '.') }}</p>
                         <p class="text-xs text-gray-400 mt-1">keluar Rp {{ number_format($totalKeluarBulanIni, 0, ',', '.') }} (termasuk gaji Rp {{ number_format($totalGajiBulanIni, 0, ',', '.') }})</p>
                     </div>
+                    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Stok Sampah Tersedia</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1">{{ number_format($totalStokSampah, 2, ',', '.') }} kg</p>
+                    </div>
                 </div>
 
                 <!-- Grafik 12 Bulan -->
                 <div class="bg-white rounded-xl shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Kas 12 Bulan (Masuk vs Keluar)</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Kas Masuk & Keluar 12 Bulan</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
@@ -107,9 +111,6 @@
                                     @endforelse
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="mt-4">
-                            <a href="{{ route('owner.laporan.index') }}" class="text-sm font-semibold text-green-600 hover:text-green-800">Buka Pusat Laporan &raquo;</a>
                         </div>
                     </div>
                 </div>

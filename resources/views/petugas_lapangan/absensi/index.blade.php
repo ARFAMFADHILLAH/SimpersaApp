@@ -40,20 +40,56 @@
                             </div>
                         </div>
 <div class="flex items-center gap-3">
-                        @if(!$absensiHariIni || !$absensiHariIni->jam_masuk)
-                            <form action="{{ route('petugas.absensi.clockin') }}" method="POST" enctype="multipart/form-data" class="flex flex-col items-end gap-2 w-full sm:w-auto">
-                                @csrf
-                                <div class="w-full sm:w-72">
-                                    <x-camera-capture name="foto_masuk" label="Foto Wajah saat Masuk" facing="user" :required="true"
-                                                      hint="Kamera realtime — ambil foto wajah langsung." />
-                                    @error('foto_masuk')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @if($absensiHariIni && in_array($absensiHariIni->status, ['izin', 'sakit']))
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="px-4 py-2 rounded-xl text-sm font-semibold
+                                    {{ $absensiHariIni->status == 'izin' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700' }}">
+                                    {{ ucfirst($absensiHariIni->status) }} &#10003;
+                                </span>
+                                @if($absensiHariIni->keterangan)
+                                    <p class="text-xs text-gray-500 max-w-xs text-right">{{ $absensiHariIni->keterangan }}</p>
+                                @endif
+                                <form action="{{ route('petugas.absensi.lapor-batal') }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-700">Batalkan Laporan</button>
+                                </form>
+                            </div>
+                        @elseif(!$absensiHariIni || !$absensiHariIni->jam_masuk)
+                            <div class="flex flex-col gap-3 w-full sm:w-96">
+                                <form action="{{ route('petugas.absensi.clockin') }}" method="POST" enctype="multipart/form-data" class="flex flex-col items-end gap-2 w-full">
+                                    @csrf
+                                    <div class="w-full">
+                                        <x-camera-capture name="foto_masuk" label="Foto Wajah saat Masuk" facing="user" :required="true"
+                                                          hint="Kamera realtime — ambil foto wajah langsung." />
+                                        @error('foto_masuk')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm">
+                                        Clock-In
+                                    </button>
+                                </form>
+                                <form action="{{ route('petugas.absensi.lapor') }}" method="POST" class="flex flex-col gap-2 border-t border-gray-200 pt-3">
+                                    @csrf
+                                    <div class="flex gap-4 text-sm">
+                                        <label class="flex items-center gap-1.5 font-medium text-gray-700">
+                                            <input type="radio" name="status" value="izin" required class="text-blue-600 focus:ring-blue-500"> Izin
+                                        </label>
+                                        <label class="flex items-center gap-1.5 font-medium text-gray-700">
+                                            <input type="radio" name="status" value="sakit" required class="text-amber-500 focus:ring-amber-500"> Sakit
+                                        </label>
+                                    </div>
+                                    <textarea name="keterangan" rows="2" maxlength="255" placeholder="Alasan (opsional)"
+                                              class="rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm"></textarea>
+                                    @error('status')
+                                        <p class="text-red-500 text-xs">{{ $message }}</p>
                                     @enderror
-                                </div>
-                                <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm">
-                                    Clock-In
-                                </button>
-                            </form>
+                                    <button type="submit" class="px-4 py-2.5 bg-gray-700 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl shadow-sm">
+                                        Lapor Izin / Sakit
+                                    </button>
+                                </form>
+                            </div>
                         @elseif(!$absensiHariIni->jam_pulang)
                             <div class="flex flex-col items-end gap-1">
                                 <span class="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-xl">Sudah Clock-In &#10003;</span>
@@ -97,6 +133,7 @@
                                         <th class="p-3 text-sm font-semibold text-gray-600">Foto Masuk</th>
                                         <th class="p-3 text-sm font-semibold text-gray-600">Foto Pulang</th>
                                         <th class="p-3 text-sm font-semibold text-gray-600">Status</th>
+                                        <th class="p-3 text-sm font-semibold text-gray-600">Keterangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -129,10 +166,11 @@
                                                 {{ ucfirst($absen->status) }}
                                             </span>
                                         </td>
+                                        <td class="p-3 text-sm text-gray-600">{{ $absen->keterangan ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="p-4 text-center text-sm text-gray-500">Belum ada riwayat absensi.</td>
+                                        <td colspan="7" class="p-4 text-center text-sm text-gray-500">Belum ada riwayat absensi.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

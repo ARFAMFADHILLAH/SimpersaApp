@@ -73,7 +73,7 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 5. Akun Admin Kedua (sebelumnya Petugas Administrasi)
+        // 5. Akun Admin Kedua 
         DB::table('users')->updateOrInsert(
             ['email' => 'Anton@sistemsampah.com'],
             [
@@ -99,7 +99,7 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 7. Akun Warga (Nasabah Bank Sampah - TANPA LOGIN, hanya data konter)
+        // 7. Akun Warga (Nasabah Bank Sampah)
         $wargaUserId = null;
         DB::table('users')->updateOrInsert(
             ['email' => 'warga@sistemsampah.com'],

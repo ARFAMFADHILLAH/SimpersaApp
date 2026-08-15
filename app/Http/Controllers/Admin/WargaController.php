@@ -11,12 +11,27 @@ use Illuminate\Support\Facades\Hash;
 
 class WargaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Load relasi user
-        $dataWarga = Warga::with(['user'])->latest()->get();
+        $keyword = $request->input('q', '');
 
-        return view('admin.warga.index', compact('dataWarga'));
+        $query = Warga::with(['user'])->latest();
+
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('no_warga', 'like', "%{$keyword}%")
+                  ->orWhere('no_hp', 'like', "%{$keyword}%")
+                  ->orWhere('alamat_lengkap', 'like', "%{$keyword}%")
+                  ->orWhereHas('user', function ($u) use ($keyword) {
+                      $u->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%");
+                  });
+            });
+        }
+
+        $dataWarga = $query->get();
+
+        return view('admin.warga.index', compact('dataWarga', 'keyword'));
     }
 
     public function create()
@@ -24,7 +39,7 @@ class WargaController extends Controller
         return view('admin.warga.create');
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $warga = Warga::with('user')->findOrFail($id);
 
@@ -53,8 +68,8 @@ class WargaController extends Controller
 
             // 3. Generate No Warga (Format: WRG-YYYYMM-0001)
             $bulanTahun = date('Ym');
-            $countWarga = Warga::whereYear('created_at', date('Y'))
-                ->whereMonth('created_at', date('m'))
+            $countWarga = Warga::where('created_at', '>=', now()->startOfMonth(), 'and')
+                ->where('created_at', '<=', now()->endOfMonth(), 'and')
                 ->count() + 1;
             $noWarga = 'WRG-'.$bulanTahun.'-'.str_pad($countWarga, 4, '0', STR_PAD_LEFT);
 
@@ -67,13 +82,13 @@ class WargaController extends Controller
             ]);
         });
 
-        return redirect()->back()->with('success', 'Warga berhasil didaftarkan! Password bawaan: password123');
+        return redirect()->back()->with('success', 'Warga berhasil didaftarkan!');
     }
 
     /**
      * Tampilkan form edit warga
      */
-    public function edit($id)
+    public function edit(int $id)
     {
         // Ambil data warga beserta relasi user
         $warga = Warga::with('user')->findOrFail($id);
@@ -84,7 +99,7 @@ class WargaController extends Controller
     /**
      * Simpan perubahan data warga
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $warga = Warga::findOrFail($id);
 
@@ -124,7 +139,7 @@ class WargaController extends Controller
             ->with('success', 'Data warga berhasil diperbarui!');
     }
 
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $warga = Warga::findOrFail($id);
 
